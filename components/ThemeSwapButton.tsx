@@ -8,19 +8,33 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // zabrání hydration mismatch, dokud nevíme jaké téma je aktivní
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
+  const isDark = theme === "dark";
+
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-2 rounded-lg border border-gray-300 dark:border-gray-700 
-                 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label="Přepnout téma"
+      className="relative w-16 h-8 rounded-full border transition-colors duration-300
+                 bg-stone-100 border-stone-300
+                 dark:bg-slate-800 dark:border-slate-700"
     >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+      {/* Posuvný kruh */}
+      <span
+        className={`absolute top-0.5 left-0.5 w-7 h-7 rounded-full shadow-md
+                    flex items-center justify-center
+                    transition-transform duration-300 ease-in-out
+                    bg-white dark:bg-slate-950
+                    ${isDark ? "translate-x-8" : "translate-x-0"}`}
+      >
+        {isDark ? (
+          <Moon size={14} className="text-white " />
+        ) : (
+          <Sun size={14} className="text-slate-900" />
+        )}
+      </span>
     </button>
   );
 }
