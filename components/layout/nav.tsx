@@ -80,7 +80,7 @@ export default function Navbar() {
   return (
     <>
       <div className="w-full relative z-40">
-        <nav className="relative w-full min-h-20 bg-white/85 dark:bg-slate-950 backdrop-blur-md border border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
+        <nav className="relative w-full min-h-20 bg-white dark:bg-slate-950 backdrop-blur-md border border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
           {/* Mobile search overlay: přes celý nav (logo i tlačítka), max prostor pro psaní */}
           {mobileSearchOpen && (
             <div className="lg:hidden absolute inset-0 z-30 flex items-center gap-2 px-3 sm:px-6 bg-white dark:bg-slate-950">
@@ -119,7 +119,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop odkazy */}
-          <div className="hidden lg:flex items-center gap-2 ml-6">
+          <div className="hidden lg:flex items-center gap-0.5 xl:gap-2 ml-3 xl:ml-6">
             {navLinks.map((link) => {
               const active = pathname === link.href;
               return (
@@ -128,8 +128,8 @@ export default function Navbar() {
                   href={link.href}
                   className={
                     active
-                      ? "px-4.5 py-2.5 rounded-full text-sm font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950 flex items-center gap-2"
-                      : "px-4.5 py-2.5 rounded-full text-sm font-medium text-stone-600 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white"
+                      ? "px-3 xl:px-4.5 py-2 xl:py-2.5 rounded-full text-sm font-semibold text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950 flex items-center gap-2 whitespace-nowrap"
+                      : "px-3 xl:px-4.5 py-2 xl:py-2.5 rounded-full text-sm font-medium text-stone-600 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white whitespace-nowrap"
                   }
                 >
                   {active && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
@@ -140,15 +140,15 @@ export default function Navbar() {
           </div>
 
           {/* Desktop pravá strana */}
-          <div className="hidden lg:flex items-center gap-3.5 shrink-0 ml-auto">
-            <div className="flex items-center gap-2.5 px-4 h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-stone-500 dark:text-slate-400 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
-              <Search className="w-4.5 h-4.5" />
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-3.5 shrink-0 ml-auto">
+            <div className="flex items-center gap-2.5 px-3 xl:px-4 h-10 xl:h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-stone-500 dark:text-slate-400 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
+              <Search className="w-4.5 h-4.5 shrink-0" />
               <input
                 type="search"
                 placeholder="Hledat druh..."
-                className="bg-transparent outline-none text-sm w-40 placeholder:text-stone-500 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
+                className="bg-transparent outline-none text-sm w-20 xl:w-40 placeholder:text-stone-500 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
               />
-              <kbd className="text-xs font-medium text-stone-400 dark:text-slate-500">
+              <kbd className="hidden xl:inline text-xs font-medium text-stone-400 dark:text-slate-500">
                 ⌘K
               </kbd>
             </div>
@@ -157,14 +157,14 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <button className="relative w-11 h-11 flex items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800">
+                <button className="hidden xl:flex relative w-11 h-11 items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800">
                   <Bell className="w-5 h-5" />
                   <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-emerald-500" />
                 </button>
 
                 <Link
                   href="/pridat"
-                  className="h-11 px-5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium flex items-center gap-1.5"
+                  className="h-10 xl:h-11 px-3.5 xl:px-5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium flex items-center gap-1.5 whitespace-nowrap"
                 >
                   + Přidat nález
                 </Link>
@@ -172,7 +172,7 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen((open) => !open)}
-                    className="flex items-center gap-1.5 pl-1.5 pr-2 h-11 rounded-full hover:bg-stone-100 dark:hover:bg-slate-800"
+                    className="flex items-center gap-1.5 pl-1.5 pr-2 h-10 xl:h-11 rounded-full hover:bg-stone-100 dark:hover:bg-slate-800"
                   >
                     <div className="w-8 h-8 rounded-full bg-stone-300 dark:bg-slate-700 overflow-hidden" />
                     <ChevronDown className="w-4.5 h-4.5 text-stone-500 dark:text-slate-400" />
@@ -195,15 +195,17 @@ export default function Navbar() {
               </>
             ) : (
               <>
+
+              
                 <Link
                   href="/login"
-                  className="px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400"
+                  className="px-3 xl:px-4 py-2 xl:py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 whitespace-nowrap"
                 >
                   Přihlásit se
                 </Link>
                 <Link
                   href="/register"
-                  className="h-11 px-5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium flex items-center"
+                  className="h-10 xl:h-11 px-3.5 xl:px-5 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-medium flex items-center whitespace-nowrap"
                 >
                   Registrovat
                 </Link>
@@ -247,6 +249,10 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex lg:hidden items-center gap-1.5 shrink-0 ml-auto">
+
+
+<ThemeToggle />
+
               <Link
                 href="/login"
                 className="px-2 py-2 text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 whitespace-nowrap"
