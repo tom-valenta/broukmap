@@ -13,13 +13,13 @@ export function GradientAnimatedBlobs({
 }: GradientAnimatedBlobsProps) {
   return (
     <section
-      className={`relative isolate border-emerald-900  border overflow-hidden rounded-2xl bg-emerald-950 dark:bg-slate-900 ${className}`}
+      className={`relative isolate border-emerald-900 max-w-7xl mx-auto   border overflow-hidden rounded-2xl bg-emerald-950 dark:bg-slate-900 ${className}`}
     >
       <div className="absolute inset-0 -z-10" aria-hidden="true">
         <div className="absolute -top-16 -left-16 w-40 h-40 sm:-top-32 sm:-left-32 sm:w-72 sm:h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 -right-20 w-48 h-48 sm:-bottom-40 sm:-right-40 sm:w-96 sm:h-128 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-1/2 -top-10 w-40 h-40 sm:-top-20 sm:w-64 sm:h-64 lg:w-104 lg:h-104 bg-emerald-800/25 rounded-full blur-3xl pointer-events-none" />
-        <BugIcon className="absolute right-8 top-45 -translate-y-1/2 dark:text-slate-700/70 text-slate-600/40 w-44 h-44 (or text-emerald-950/40)" />
+        <BugIcon className="absolute right-8 top-45 -translate-y-1/2 dark:text-slate-600/93 text-slate-600/93 w-44 h-44 (or text-emerald-950/40)" />
       </div>
 
       <div className="p-6 sm:p-6 flex flex-col gap-4 sm:gap-7 max-w-6xl">

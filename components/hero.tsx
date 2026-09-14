@@ -13,16 +13,17 @@ import {
 
 export default function Hero() {
   return (
-    <section className="relative z-0 px-5 py-12 lg:py-24 overflow-hidden  bg-stone-50 dark:bg-slate-950 ">
-      {/* subtle organic background glow */}
-      <div className="absolute -top-24 right-0 w-[min(500px,80vw)] h-[min(500px,80vw)] rounded-full bg-emerald-400/40 dark:bg-emerald-500/60 dark:mix-blend-screen blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-15 left-12 w-[min(350px,70vw)] h-[min(350px,70vw)] rounded-full bg-amber-400/40 dark:bg-amber-500/60 dark:mix-blend-screen blur-3xl pointer-events-none -z-10" />
+    <section className="relative z-0 px-5 py-12 lg:py-24 overflow-hidden bg-linear-to-b from-[#f6f7f1] via-emerald-50 to-stone-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-130 h-130 rounded-full  bg-emerald-300/30 blur-[120px]" />
+
+      <div className="absolute -top-24 right-0 w-[min(500px,80vw)] h-[min(500px,80vw)] rounded-full bg-emerald-400/40  dark:mix-blend-screen blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-15 left-12 w-[min(350px,70vw)] h-[min(350px,70vw)] rounded-full bg-green-300/40 dark:mix-blend-screen blur-3xl pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center lg:items-stretch text-stone-600">
         {/* Left column */}
         <div className="lg:col-span-7 flex flex-col items-start">
           {/* badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full dark:bg-slate-900 border border-slate-800 dark:text-emerald-500 font-bold text-sm mb-5 shadow-sm">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-stone-200 dark:bg-slate-900 dark:border-slate-800 dark:text-emerald-500 font-bold text-sm mb-5 shadow-sm">
             <FlaskConical className="w-4 h-4 " />
             <span>Ve spolupráci s AOPK ČR, NDOP a ČSE</span>
             <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
@@ -67,14 +68,14 @@ export default function Hero() {
             <span className="text-xs uppercase tracking-widest dark:text-slate-400 font-bold">
               Odborní garanti:
             </span>
-            <div className="flex items-center gap-2 flex-wrap dark:text-slate-100 font-bold text-sm">
-              <span className="px-2 py-1 rounded border-stone-200 shadow-sm transition-colors  dark:bg-slate-900 dark:border-slate-800 border">
+            <div className="flex items-center gap-2 flex-wrap font-bold text-sm">
+              <span className="px-2 py-1 rounded border bg-white border-stone-300 text-stone-800 shadow-sm transition-colors dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100">
                 AOPK ČR
               </span>
-              <span className="px-2 py-1 rounded border-stone-200 shadow-sm transition-colors dark:bg-slate-900 dark:border-slate-800 border">
+              <span className="px-2 py-1 rounded border bg-white border-stone-300 text-stone-800 shadow-sm transition-colors dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100">
                 NDOP Biomonitoring
               </span>
-              <span className="px-2 py-1 rounded border-stone-200 shadow-sm transition-colors dark:bg-slate-900 dark:border-slate-800 border">
+              <span className="px-2 py-1 rounded border bg-white border-stone-300 text-stone-800 shadow-sm transition-colors dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100">
                 Česká společnost entomologická
               </span>
             </div>
@@ -83,7 +84,7 @@ export default function Hero() {
 
         {/* Right column: image */}
         <div className="lg:col-span-5 relative lg:h-full">
-          <div className="relative rounded-xl overflow-hidden shadow-xl aspect-[4/3] lg:aspect-auto lg:h-full">
+          <div className="relative rounded-xl overflow-hidden shadow-xl aspect-4/3 lg:aspect-auto lg:h-full">
             <img
               src="/idk.jpg"
               alt="Roháč obecný (Lucanus cervus) na kmeni starého dubu porostlém mechem v lužním lese"
@@ -96,13 +97,13 @@ export default function Hero() {
             />
 
             {/* top-left tag */}
-            <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-white/95 border-stone-200 dark:bg-slate-900/60  dark:border-slate-800 border backdrop-blur-md rounded-full dark:text-emerald-400 text-xs font-bold shadow-md">
+            <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1 bg-white/95 border-stone-200 dark:bg-slate-900/60  dark:border-slate-800 border backdrop-blur-md rounded-full text-emerald-700 dark:text-emerald-400 text-xs font-bold shadow-md">
               <span className="w-2 h-2 rounded-full bg-emerald-700  animate-pulse" />
               <span>Nález týdne</span>
             </div>
 
             {/* top-right badge */}
-            <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 bg-white/95 border-stone-200 dark:bg-slate-900/60 dark:border-slate-800 dark:text-emerald-400  border backdrop-blur-md rounded-full text-xs font-bold shadow-md">
+            <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1 bg-white/95 border-stone-200 dark:bg-slate-900/60 dark:border-slate-800 text-emerald-700 dark:text-emerald-400  border backdrop-blur-md rounded-full text-xs font-bold shadow-md">
               <CheckCircle2
                 className="w-3.5 h-3.5 text-emerald-700"
                 strokeWidth={3}
@@ -111,26 +112,26 @@ export default function Hero() {
             </div>
 
             {/* bottom info card */}
-            <div className="absolute inset-x-4 bottom-4 p-4 dark:bg-slate-900 dark:border-slate-800 bg-white/95 border-stone-200/80 border backdrop-blur-md rounded-xl shadow-lg flex flex-col gap-1">
+            <div className="absolute inset-x-4 bottom-4 p-4 dark:bg-slate-900 dark:border-slate-800 bg-white/95 border-stone-300/80 border backdrop-blur-md rounded-xl shadow-lg flex flex-col gap-1">
               <div className="flex items-center justify-between">
-                <span className="text-lg font-semibold dark:text-white">
+                <span className="text-lg font-semibold text-stone-900 dark:text-white">
                   Roháč obecný
                 </span>
-                <span className="text-xs text-red-400 dark:bg-red-950/60 bg-red-300/30 px-2 py-0.5 rounded font-bold">
+                <span className="text-xs text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-950/60 px-2 py-0.5 rounded font-bold">
                   Kriticky ohrožený
                 </span>
               </div>
-              <div className="flex items-center justify-between text-sm dark:text-slate-300">
+              <div className="flex items-center justify-between text-sm text-stone-700 dark:text-slate-300">
                 <span className="italic">Lucanus cervus (Linnaeus, 1758)</span>
                 <span className="flex items-center gap-1 ">
                   <MapPin
-                    className="w-3.5 h-3.5 dark:text-emerald-500"
+                    className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-500"
                     strokeWidth={3}
                   />
                   CHKO Křivoklátsko
                 </span>
               </div>
-              <div className="mt-1 pt-1.5 flex items-center justify-between text-[11px] dark:text-slate-300">
+              <div className="mt-1 pt-1.5 flex items-center justify-between text-[11px] text-stone-500 dark:text-slate-300">
                 <span>Determinoval: RNDr. V. Křivánek, CSc.</span>
                 <span>18. června 2024</span>
               </div>
@@ -139,58 +140,74 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl  md:px-10 lg:px-16 py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 bg-white shadow-2xl border-stone-200 border dark:bg-slate-900 dark:border-slate-800 px-6 md:px-10 py-8 rounded-3xl items-stretch">
-          <div className="flex flex-col min-w-0 border md:border-0  border-stone-200 dark:border-slate-800 p-3 rounded-2xl dark:bg-slate-950 h-full">
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 dark:text-white font-bold text-xl md:text-2xl text-stone-900 min-w-0">
-              <BugIcon className="text-green-800 w-5 h-5 md:w-6 md:h-6 shrink-0" />
-              <span>14 850+</span>
+      <div className="mx-auto max-w-7xl  py-12 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4   py-8 rounded-3xl items-stretch">
+          <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
+            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
+              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-slate-400 text-sm md:text-base wrap-break-word">
-              Zmapovaných nálezů
-            </p>
-            <p className="text-stone-500 dark:text-slate-400/90 text-xs md:text-sm wrap-break-word">
-              z celého území ČR
-            </p>
+            <div className="flex flex-col min-w-0">
+              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
+                1 420
+              </span>
+              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
+                Zmapovaných nálezů
+              </p>
+              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
+                z celého území ČR
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col min-w-0 border md:border-0  border-stone-200 dark:border-slate-800 p-3 rounded-2xl dark:bg-slate-950 h-full">
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 dark:text-white font-bold text-xl md:text-2xl text-stone-900 min-w-0">
-              <UserGroup className="w-5 h-5 md:w-6 md:h-6 text-amber-600 shrink-0" />
-              <span>1 420</span>
+           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
+            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
+              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-slate-400 text-sm md:text-base wrap-break-word">
-              Zmapovaných nálezů
-            </p>
-            <p className="text-stone-500 dark:text-slate-400/90 text-xs md:text-sm wrap-break-word">
-              z celého území ČR
-            </p>
+            <div className="flex flex-col min-w-0">
+              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
+                1 420
+              </span>
+              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
+                Zmapovaných nálezů
+              </p>
+              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
+                z celého území ČR
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col min-w-0 border md:border-0  border-stone-200 dark:border-slate-800 p-3 rounded-2xl dark:bg-slate-950 h-full">
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 dark:text-white font-bold text-xl md:text-2xl text-stone-900 min-w-0">
-              <BadgeCheck className="w-5 h-5 md:w-6 md:h-6 text-green-800 rounded shrink-0" />
-              <span>100 %</span>
+           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
+            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
+              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-slate-400 text-sm md:text-base wrap-break-word">
-              Zmapovaných nálezů
-            </p>
-            <p className="text-stone-500 dark:text-slate-400/90 text-xs md:text-sm wrap-break-word">
-              z celého území ČR
-            </p>
+            <div className="flex flex-col min-w-0">
+              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
+                1 420
+              </span>
+              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
+                Zmapovaných nálezů
+              </p>
+              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
+                z celého území ČR
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-col min-w-0 border md:border-0  border-stone-200 dark:border-slate-800 p-3 rounded-2xl dark:bg-slate-950 h-full">
-            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 dark:text-white font-bold text-xl md:text-2xl text-stone-900 min-w-0">
-              <Shield className="w-5 h-5 md:w-6 md:h-6 text-amber-600 shrink-0" />
-              <span>182</span>
+           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
+            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
+              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
             </div>
-            <p className="font-semibold text-stone-700 dark:text-slate-400 text-sm md:text-base wrap-break-word">
-              Ohrožených druhů
-            </p>
-            <p className="text-stone-500 dark:text-slate-400/90 text-xs md:text-sm wrap-break-word">
-              z celého území ČR
-            </p>
+            <div className="flex flex-col min-w-0">
+              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
+                1 420
+              </span>
+              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
+                Zmapovaných nálezů
+              </p>
+              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
+                z celého území ČR
+              </p>
+            </div>
           </div>
         </div>
       </div>
