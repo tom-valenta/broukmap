@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { OAuthButton } from "@/components/OAuthButton";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { AppleIcon } from "@/components/icons/AppleIcon";
+import { CircleAlert } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -80,7 +81,8 @@ export default function LoginForm() {
         <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-md">
+              <p className="text-sm text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-950/60 px-3 py-2 rounded-md flex flex-row gap-2 items-center">
+                <CircleAlert className="h-5 w-5" />
                 {error}
               </p>
             )}
@@ -106,12 +108,23 @@ export default function LoginForm() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm/6 font-bold dark:text-slate-300 text-stone-700"
-              >
-                Heslo
-              </label>
+              <div className="flex flex-row justify-between">
+                <label
+                  htmlFor="password"
+                  className="block text-sm/6 font-bold dark:text-slate-300 text-stone-700"
+                >
+                  Heslo
+                </label>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                  <a
+                    href="/reset-password"
+                    className="font-medium hover:underline"
+                  >
+                    Zapomněli jste heslo?
+                  </a>
+                </p>
+              </div>
+
               <div className="mt-2">
                 <input
                   id="password"
