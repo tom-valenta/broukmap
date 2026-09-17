@@ -75,6 +75,7 @@ import {
   AwardIcon,
   MessagesSquare,
 } from "lucide-react";
+import { verify } from "crypto";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -125,8 +126,8 @@ export default async function HomePage() {
               step="02"
               title="2. Nahrajte s lokalitou"
               description="Aplikace z fotografie automaticky načte GPS souřadnice a čas. Můžete připsat poznámku o biotopu (např. trouchnivějící pařez buku) nebo počasí."
-              tip="Tip: Vyhněte se přímému blesku"
-              tipIcon={LightbulbIcon}
+              tip="Předání do centrální databáze NDOP"
+              tipIcon={MapPin}
               tipIconColor="dark:text-lime-400 dark:border-lime-300/30 text-stone-800 border-amber-300"
             />
 
@@ -136,8 +137,8 @@ export default async function HomePage() {
               step="03"
               title="3. Vyfoťte hmyz v terénu"
               description="Zkušení determinátoři a akademičtí entomologové určí nebo potvrdí druh. Nález je verifikován a data se stávají oficiálním podkladem ochrany přírody ČR."
-              tip="Tip: Vyhněte se přímému blesku"
-              tipIcon={LightbulbIcon}
+              tip="Předání do centrální databáze NDOP"
+              tipIcon={BadgeCheck}
               tipIconColor="dark:text-amber-400 dark:border-amber-300/30 text-stone-800 border-amber-300"
             />
           </div>
