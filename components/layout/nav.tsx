@@ -17,6 +17,7 @@ import {
   UserRound,
   Menu,
   X,
+  LogOutIcon,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -32,9 +33,11 @@ export default function Navbar() {
 
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      },
+    );
 
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -55,7 +58,7 @@ export default function Navbar() {
   }
 
   const navLinks = [
-    { href: "/mapa", label: "Mapa nálezů" },
+    { href: "/map", label: "Mapa nálezů" },
     { href: "/atlas", label: "Atlas druhů" },
     { href: "/objevovat", label: "Objevovat" },
     { href: "/komunita", label: "Komunita" },
@@ -71,7 +74,7 @@ export default function Navbar() {
 
   // spodní quick menu pro mobil
   const bottomNavLinks = [
-    { href: "/mapa", label: "Mapa", icon: Map },
+    { href: "/map", label: "Mapa", icon: Map },
     { href: "/atlas", label: "Atlas", icon: BookOpen },
     { href: "/aktivita", label: "Aktivita", icon: Zap },
     { href: "/profil", label: "Profil", icon: UserRound },
@@ -80,7 +83,7 @@ export default function Navbar() {
   return (
     <>
       <div className="w-full relative z-40">
-        <nav className="relative w-full min-h-20 bg-white dark:bg-slate-950 backdrop-blur-md border border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
+        <nav className="relative w-full min-h-20 bg-white dark:bg-slate-950 backdrop-blur-md border-b border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
           {/* Mobile search overlay: přes celý nav (logo i tlačítka), max prostor pro psaní */}
           {mobileSearchOpen && (
             <div className="lg:hidden absolute inset-0 z-30 flex items-center gap-2 px-3 sm:px-6 bg-white dark:bg-slate-950">
@@ -132,7 +135,9 @@ export default function Navbar() {
                       : "px-3 xl:px-4.5 py-2 xl:py-2.5 rounded-full text-sm font-medium text-stone-600 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white whitespace-nowrap"
                   }
                 >
-                  {active && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
+                  {active && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  )}
                   {link.label}
                 </Link>
               );
@@ -195,8 +200,6 @@ export default function Navbar() {
               </>
             ) : (
               <>
-
-              
                 <Link
                   href="/login"
                   className="px-3 xl:px-4 py-2 xl:py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 whitespace-nowrap"
@@ -242,29 +245,43 @@ export default function Navbar() {
                     aria-expanded={hamburgerOpen}
                   >
                     <span className="sr-only">Otevřít menu</span>
-                    {hamburgerOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                    {hamburgerOpen ? (
+                      <X className="w-5 h-5" />
+                    ) : (
+                      <Menu className="w-5 h-5" />
+                    )}
                   </button>
                 </>
               )}
             </div>
           ) : (
             <div className="flex lg:hidden items-center gap-1.5 shrink-0 ml-auto">
+              {!mobileSearchOpen && (
+                <>
+                  <button
+                    onClick={() => setMobileSearchOpen(true)}
+                    className="w-9 h-9 flex items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800 shrink-0"
+                    aria-label="Hledat druh"
+                  >
+                    <Search className="w-5 h-5" />
+                  </button>
 
+                  <ThemeToggle />
 
-<ThemeToggle />
-
-              <Link
-                href="/login"
-                className="px-2 py-2 text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 whitespace-nowrap"
-              >
-                Přihlásit
-              </Link>
-              <Link
-                href="/register"
-                className="h-9 sm:h-10 px-3 sm:px-4 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-medium flex items-center whitespace-nowrap shrink-0"
-              >
-                Registrovat
-              </Link>
+                  <Link
+                    href="/login"
+                    className="px-2 py-2 text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 whitespace-nowrap"
+                  >
+                    Přihlásit
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="h-9 sm:h-10 px-3 sm:px-4 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-medium flex items-center whitespace-nowrap shrink-0"
+                  >
+                    Registrovat
+                  </Link>
+                </>
+              )}
             </div>
           )}
         </nav>
@@ -276,7 +293,19 @@ export default function Navbar() {
             ref={hamburgerRef}
             className="lg:hidden w-full bg-white dark:bg-slate-950 border-x border-b border-stone-200/90 dark:border-slate-800 shadow-sm px-4 py-4 flex flex-col gap-1"
           >
+
+  <div className="flex items-center gap-2.5 px-4 py-2">
+              <div className="w-8 h-8 rounded-full bg-stone-300 dark:bg-slate-700 shrink-0" />
+              <span className="text-sm text-stone-600 dark:text-slate-300 truncate">
+                {user.email}
+              </span>
+            </div>
+
             {hamburgerExtraLinks.map((link) => (
+
+              
+
+
               <Link
                 key={link.href}
                 href={link.href}
@@ -289,6 +318,7 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
+
             <button className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900">
               <span className="flex items-center gap-2">
                 <Bell className="w-4.5 h-4.5" />
@@ -299,16 +329,12 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
-            <div className="flex items-center gap-2.5 px-4 py-2">
-              <div className="w-8 h-8 rounded-full bg-stone-300 dark:bg-slate-700 shrink-0" />
-              <span className="text-sm text-stone-600 dark:text-slate-300 truncate">
-                {user.email}
-              </span>
-            </div>
             <button
               onClick={handleLogout}
-              className="mt-1 px-4 py-3 rounded-xl text-sm font-medium text-left text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900"
+              className="mt-1 px-4 py-3 rounded-xl text-sm font-medium text-left text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900 flex flex-row items-center gap-2"
             >
+            
+            <LogOutIcon className="w-4.5 h-4.5"    />
               Odhlásit
             </button>
           </div>
