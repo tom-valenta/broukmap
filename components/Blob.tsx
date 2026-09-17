@@ -26,11 +26,11 @@ export function GradientAnimatedBlobs({
         <p className="dark:text-emerald-500 text-emerald-600 font-bold text-sm sm:text-base">
           Zapojte se ještě dnes
         </p>
-        <p className="text-2xl sm:text-3xl lg:text-5xl font-bold leading-tight">
+        <p className="text-2xl sm:text-3xl lg:text-5xl font-bold leading-tight text-white">
           {title}
         </p>
 
-        <p className="text-sm sm:text-base">
+        <p className="text-sm sm:text-base text-white">
           I obyčejný chrobák na polní cestě má pro mapování biodiverzity význam.
           Pomozte nám tvořit nejucelenější entomologický atlas České republiky.
         </p>
