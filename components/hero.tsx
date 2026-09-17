@@ -4,12 +4,13 @@ import {
   ArrowRight,
   CheckCircle2,
   MapPin,
-  Bug,
-  BugIcon,
-  UserGroup,
-  BadgeCheck,
-  Shield,
+  MapIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  AlertTriangleIcon,
 } from "lucide-react";
+
+import HeroCard from "./HeroCard";
 
 export default function Hero() {
   return (
@@ -141,74 +142,35 @@ export default function Hero() {
       </div>
 
       <div className="mx-auto max-w-7xl  py-12 md:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4   py-8 rounded-3xl items-stretch">
-          <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
-            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
-              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
-                1 420
-              </span>
-              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
-                Zmapovaných nálezů
-              </p>
-              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
-                z celého území ČR
-              </p>
-            </div>
-          </div>
-
-           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
-            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
-              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
-                1 420
-              </span>
-              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
-                Zmapovaných nálezů
-              </p>
-              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
-                z celého území ČR
-              </p>
-            </div>
-          </div>
-
-           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
-            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
-              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
-                1 420
-              </span>
-              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
-                Zmapovaných nálezů
-              </p>
-              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
-                z celého území ČR
-              </p>
-            </div>
-          </div>
-
-           <div className="flex items-center gap-2 md:gap-3 min-w-0 border bg-white shadow-lg border-slate-200 dark:bg-slate-950 dark:border-slate-800 p-3 md:p-7  rounded-xl md:rounded-2xl h-full">
-            <div className="flex items-center justify-center shrink-0 w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl bg-amber-100 dark:bg-amber-950/40">
-              <UserGroup className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="dark:text-white font-bold text-lg md:text-2xl text-stone-900 leading-tight">
-                1 420
-              </span>
-              <p className="font-semibold text-stone-700 dark:text-slate-400 text-xs md:text-base leading-snug wrap-break-word">
-                Zmapovaných nálezů
-              </p>
-              <p className="text-stone-500 dark:text-slate-400/90 text-[11px] md:text-sm leading-snug wrap-break-word">
-                z celého území ČR
-              </p>
-            </div>
-          </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 py-8 rounded-3xl items-stretch">
+  <HeroCard
+  icon={MapIcon}
+  iconColor="dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800 bg-emerald-100 text-emerald-800 border-emerald-300"
+  number="14 850"
+  title="Zmapovaných nálezů"
+  description="z celého území ČR"
+/>
+<HeroCard
+  icon={UsersIcon}
+  iconColor="dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800 bg-sky-100 text-sky-800 border-sky-300"
+  number="1 420"
+  title="Terénních mapovatelů"
+  description="amatérů i profesionálů"
+/>
+<HeroCard
+  icon={CheckCircleIcon}
+  iconColor="dark:bg-teal-950/50 dark:text-teal-400 dark:border-teal-800 bg-teal-100 text-teal-800 border-teal-300"
+  number="100%"
+  title="Kontrola komunitou"
+  description="pro správné určení"
+/>
+<HeroCard
+  icon={AlertTriangleIcon}
+  iconColor="dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800 bg-amber-100 text-amber-800 border-amber-300"
+  number="182"
+  title="Ohrožených druhů"
+  description="přidáno do NDOP pro ochranu"
+/>
         </div>
       </div>
     </section>
