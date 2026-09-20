@@ -15,55 +15,48 @@ export default function SetNewPasswordForm() {
 
     useEffect(() => {
         const supabase = createClient();
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
             if (event === "PASSWORD_RECOVERY") {
                 setIsRecoveryFlow(true);
+                setCheckingFlow(false);
             }
+        });
+
+        // Fallback, kdyby event PASSWORD_RECOVERY přišel dřív než se listener zaregistroval
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) setIsRecoveryFlow(true);
             setCheckingFlow(false);
         });
 
-        // Pokud event nepřijde do chvíle, dej tomu krátký timeout
-        const timeout = setTimeout(() => setCheckingFlow(false), 1500);
-
         return () => {
             subscription.unsubscribe();
-            clearTimeout(timeout);
         };
     }, []);
 
     if (checkingFlow) {
-        return /* loading spinner nebo prázdný stav */;
+        return null;
     }
 
     if (!isRecoveryFlow) {
         return (
-
-
-
-    //   styled message: "Tento odkaz pro reset hesla je neplatný nebo vypršel. Zkuste prosím znovu požádat o reset hesla."
-    <div className="relative flex h-full w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-300/40 dark:bg-emerald-500/20 blur-3xl animate-blob" />
-            <div className="absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full bg-sky-300/30 dark:bg-green-600/20 blur-3xl animate-blob animation-delay-2000" />
-            <div className="absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-amber-200/30 dark:bg-emerald-700/10 blur-3xl animate-blob animation-delay-4000" />
-        </div>
-        <div className="relative bg-white dark:bg-slate-900 mx-auto w-full max-w-md rounded-2xl border dark:border-slate-800 border-stone-200 shadow-xl ring-gray-900/5 p-6">
-            <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight dark:text-slate-300 text-stone-700">
-                Tento odkaz pro reset hesla je neplatný nebo vypršel.
-            </h2>
-            <p className="mt-2 text-center text-sm/6 text-stone-600 dark:text-slate-400">
-                Zkuste prosím znovu požádat o reset hesla.
-            </p>
-        </div>
-    </div>
-
-    
-
-
+            <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-300/40 dark:bg-emerald-500/20 blur-3xl animate-blob" />
+                    <div className="absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full bg-sky-300/30 dark:bg-green-600/20 blur-3xl animate-blob animation-delay-2000" />
+                    <div className="absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-amber-200/30 dark:bg-emerald-700/10 blur-3xl animate-blob animation-delay-4000" />
+                </div>
+                <div className="relative bg-white dark:bg-slate-900 mx-auto w-full max-w-md rounded-2xl border dark:border-slate-800 border-stone-200 shadow-xl ring-gray-900/5 p-6">
+                    <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight dark:text-slate-300 text-stone-700">
+                        Tento odkaz pro reset hesla je neplatný nebo vypršel.
+                    </h2>
+                    <p className="mt-2 text-center text-sm/6 text-stone-600 dark:text-slate-400">
+                        Zkuste prosím znovu požádat o reset hesla.
+                    </p>
+                </div>
+            </div>
         );
     }
-
-
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -94,6 +87,7 @@ export default function SetNewPasswordForm() {
         setLoading(false);
 
         if (updateError) {
+            console.error(updateError);
             setError(updateError.message);
             return;
         }
@@ -102,7 +96,7 @@ export default function SetNewPasswordForm() {
     }
 
     return (
-        <div className="relative flex h-full w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
+        <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-300/40 dark:bg-emerald-500/20 blur-3xl animate-blob" />
                 <div className="absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full bg-sky-300/30 dark:bg-green-600/20 blur-3xl animate-blob animation-delay-2000" />
