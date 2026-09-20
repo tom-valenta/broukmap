@@ -1,6 +1,7 @@
 "use client";
 import UserAvatar from "@/components/UserAvatar";
 import Link from "next/link";
+import type { Database } from "@/lib/supabase/database.types";
 import { useEffect, useState } from "react";
 import {
   BadgeCheck,
@@ -14,15 +15,17 @@ import {
   Pencil,
 } from "lucide-react";
 
+
+
 type ProfileHeaderCardProps = {
   profile: {
     id: string;
     username: string;
     avatar_url: string | null;
-    created_at: string;
+    created_at: string | null;
     display_name: string | null;
     bio: string | null;
-    role: string; // nebo přesnější union typ, viz níže
+    role: Database["public"]["Enums"]["profile_role"] | null;
   };
   isOwnProfile: boolean;
 };
