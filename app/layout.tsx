@@ -43,14 +43,14 @@ export default async function RootLayout({
   }
 
   return (
-<html lang="cs" className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-  <body className="min-h-dvh flex flex-col bg-[#fbfbf7] dark:bg-slate-950">
+    <html
+      lang="cs"
+      className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="min-h-dvh flex flex-col bg-white dark:bg-slate-950">
         <AuthProvider initialUser={user} initialProfile={profile}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-          >
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Navbar />
             <main className="flex flex-1 flex-col">{children}</main>
             <Footer />
