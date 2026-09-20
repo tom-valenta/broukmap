@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/app/contexts/AuthProvider";
 import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
 import { ThemeToggle } from "../ThemeSwapButton";
+import UserAvatar from "../UserAvatar";
 import {
   Search,
   Bell,
@@ -18,29 +19,23 @@ import {
   Menu,
   X,
   LogOutIcon,
+  Home,
 } from "lucide-react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [hamburgerOpen, setHamburgerOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+
+  const { user, profile } = useAuth();
+  const username = profile?.username ?? null;
+
   const pathname = usePathname();
   const hamburgerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user ?? null);
-      },
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const mobileNotifRef = useRef<HTMLDivElement>(null);
 
   // zavřít hamburger panel při změně velikosti okna nad lg breakpoint
   useEffect(() => {
@@ -49,6 +44,42 @@ export default function Navbar() {
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // zavřít user menu a notifikace při kliknutí kamkoli mimo ně
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
+        setMenuOpen(false);
+      }
+
+      const clickedOutsideDesktopNotif =
+        !notifRef.current || !notifRef.current.contains(target);
+      const clickedOutsideMobileNotif =
+        !mobileNotifRef.current || !mobileNotifRef.current.contains(target);
+
+      if (clickedOutsideDesktopNotif && clickedOutsideMobileNotif) {
+        setNotifOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // zavřít user menu a notifikace klávesou Escape
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        setNotifOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   async function handleLogout() {
@@ -74,10 +105,11 @@ export default function Navbar() {
 
   // spodní quick menu pro mobil
   const bottomNavLinks = [
+    { href: "/", label: "Domů", icon: Home },
     { href: "/map", label: "Mapa", icon: Map },
     { href: "/atlas", label: "Atlas", icon: BookOpen },
     { href: "/aktivita", label: "Aktivita", icon: Zap },
-    { href: "/profil", label: "Profil", icon: UserRound },
+    { href: `/profile/${username}`, label: "Profil", icon: UserRound },
   ];
 
   return (
@@ -162,10 +194,26 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <button className="hidden xl:flex relative w-11 h-11 items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-emerald-500" />
-                </button>
+                <div className="hidden xl:block relative" ref={notifRef}>
+                  <button
+                    onClick={() => setNotifOpen((open) => !open)}
+                    className="relative w-11 h-11 flex items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800"
+                  >
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-emerald-500" />
+                  </button>
+
+                  {notifOpen && (
+                    <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl shadow-lg py-2 w-72 z-50">
+                      <span className="block px-4 py-2 text-sm font-semibold text-stone-700 dark:text-slate-200">
+                        Oznámení
+                      </span>
+                      <div className="px-4 py-6 text-sm text-stone-500 dark:text-slate-400 text-center">
+                        Žádná nová oznámení
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <Link
                   href="/pridat"
@@ -174,25 +222,40 @@ export default function Navbar() {
                   + Přidat nález
                 </Link>
 
-                <div className="relative">
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setMenuOpen((open) => !open)}
                     className="flex items-center gap-1.5 pl-1.5 pr-2 h-10 xl:h-11 rounded-full hover:bg-stone-100 dark:hover:bg-slate-800"
                   >
-                    <div className="w-8 h-8 rounded-full bg-stone-300 dark:bg-slate-700 overflow-hidden" />
+                    <UserAvatar
+                      profile={profile}
+                      size={32}
+                      className="w-8 h-8 rounded-full"
+                    />
                     <ChevronDown className="w-4.5 h-4.5 text-stone-500 dark:text-slate-400" />
                   </button>
 
                   {menuOpen && (
                     <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl shadow-lg py-1.5 w-56 z-50">
-                      <span className="block px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 truncate">
-                        {user.email}
-                      </span>
+                      <Link
+                        href={`/profile/${username}`}
+                        className="block px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                      >
+                        {username}
+                      </Link>
+
+                      <Link
+                        href={`/profile/settings`}
+                        className="block px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                      >
+                        Nastavení
+                      </Link>
+
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800"
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800 border-t dark:border-slate-700 border-slate-300"
                       >
-                        Odhlásit
+                        Odhlásit se
                       </button>
                     </div>
                   )}
@@ -293,19 +356,22 @@ export default function Navbar() {
             ref={hamburgerRef}
             className="lg:hidden w-full bg-white dark:bg-slate-950 border-x border-b border-stone-200/90 dark:border-slate-800 shadow-sm px-4 py-4 flex flex-col gap-1"
           >
-
-  <div className="flex items-center gap-2.5 px-4 py-2">
-              <div className="w-8 h-8 rounded-full bg-stone-300 dark:bg-slate-700 shrink-0" />
-              <span className="text-sm text-stone-600 dark:text-slate-300 truncate">
-                {user.email}
-              </span>
+            <div className="flex items-center gap-2.5 px-4 py-2">
+              <UserAvatar
+                profile={profile}
+                size={32}
+                className="w-8 h-8 rounded-full"
+              />
+              <Link
+                href={`/profile/${username}`}
+                onClick={() => setHamburgerOpen(false)}
+                className="text-sm text-stone-600 dark:text-slate-300 truncate hover:underline"
+              >
+                {username ?? user.email}
+              </Link>
             </div>
 
             {hamburgerExtraLinks.map((link) => (
-
-              
-
-
               <Link
                 key={link.href}
                 href={link.href}
@@ -318,14 +384,24 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
+            <div ref={mobileNotifRef}>
+              <button
+                onClick={() => setNotifOpen((open) => !open)}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900"
+              >
+                <span className="flex items-center gap-2">
+                  <Bell className="w-4.5 h-4.5" />
+                  Oznámení
+                </span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              </button>
 
-            <button className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900">
-              <span className="flex items-center gap-2">
-                <Bell className="w-4.5 h-4.5" />
-                Oznámení
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            </button>
+              {notifOpen && (
+                <div className="mx-4 mt-1 mb-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-6 text-sm text-stone-500 dark:text-slate-400 text-center">
+                  Žádná nová oznámení
+                </div>
+              )}
+            </div>
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
@@ -333,8 +409,7 @@ export default function Navbar() {
               onClick={handleLogout}
               className="mt-1 px-4 py-3 rounded-xl text-sm font-medium text-left text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900 flex flex-row items-center gap-2"
             >
-            
-            <LogOutIcon className="w-4.5 h-4.5"    />
+              <LogOutIcon className="w-4.5 h-4.5" />
               Odhlásit
             </button>
           </div>
