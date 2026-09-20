@@ -7,22 +7,28 @@ import { AppleIcon } from "@/components/icons/AppleIcon";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { CircleAlert } from "lucide-react";
 
+// Must match the DB constraint exactly: profiles_username_format
+// check (username ~ '^[a-z0-9_]{3,20}$')
+const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
+
 export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<
-    "idle" | "checking" | "available" | "taken" | "error"
+    "idle" | "invalid" | "checking" | "available" | "taken" | "error"
   >("idle");
 
   useEffect(() => {
-    const trimmed = displayName.trim();
-
-    // krátká/prázdná jména nekontrolujeme (ať to nespamuje dotazy hned od prvního znaku)
-    if (trimmed.length < 3 || !/^[a-zA-Z0-9_.]{1,30}$/.test(trimmed)) {
+    if (username.length === 0) {
       setUsernameStatus("idle");
+      return;
+    }
+
+    if (!USERNAME_REGEX.test(username)) {
+      setUsernameStatus("invalid");
       return;
     }
 
@@ -31,7 +37,7 @@ export default function RegisterForm() {
     const timeout = setTimeout(async () => {
       const supabase = createClient();
       const { data, error } = await supabase.rpc("is_username_available", {
-        desired_username: trimmed,
+        desired_username: username,
       });
 
       if (error) {
@@ -43,68 +49,72 @@ export default function RegisterForm() {
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [displayName]);
+  }, [username]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault();
-  setError(null);
-  setLoading(true);
+    e.preventDefault();
+    setError(null);
 
-  const formData = new FormData(e.currentTarget);
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+    if (!USERNAME_REGEX.test(username)) {
+      setUsernameStatus("invalid");
+      return;
+    }
 
-  const supabase = createClient();
+    setLoading(true);
 
-  // Jméno už kontrolujeme průběžně při psaní (usernameStatus), ale těsně před
-  // odesláním to ověříme ještě jednou pro jistotu (uživatel mohl čekat s odesláním).
-  const { data: available, error: checkError } = await supabase.rpc(
-    "is_username_available",
-    { desired_username: displayName }
-  );
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-  if (checkError) {
-    setError("Něco se pokazilo, zkuste to znovu.");
-    setLoading(false);
-    return;
-  }
+    const supabase = createClient();
 
-  if (!available) {
-    setUsernameStatus("taken");
-    setLoading(false);
-    return;
-  }
+    // Uživatelské jméno kontrolujeme průběžně (usernameStatus), ale těsně
+    // před odesláním to ověříme ještě jednou pro jistotu (race condition).
+    const { data: available, error: checkError } = await supabase.rpc(
+      "is_username_available",
+      { desired_username: username }
+    );
 
-  // Teprve teď signUp
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        display_name: displayName,
+    if (checkError) {
+      setError("Něco se pokazilo, zkuste to znovu.");
+      setLoading(false);
+      return;
+    }
+
+    if (!available) {
+      setUsernameStatus("taken");
+      setLoading(false);
+      return;
+    }
+
+    // handle_new_user() v databázi čte raw_user_meta_data->>'username'.
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username,
+        },
       },
-    },
-  });
+    });
 
-  setLoading(false);
+    setLoading(false);
 
-  if (error) {
-    console.log("AUTH ERROR:", error.message, error.code, error.status, error);
-    // Sem už by se v běžném provozu skoro nikdy nemělo dostat kvůli display_name,
-    // jen při race condition. Obecná hláška je v pořádku.
-    setError("Něco se pokazilo, zkuste to znovu.");
-    return;
+    if (error) {
+      console.log("AUTH ERROR:", error.message, error.code, error.status, error);
+      // Sem už by se v běžném provozu skoro nikdy nemělo dostat kvůli username,
+      // jen při race condition. Obecná hláška je v pořádku.
+      setError("Něco se pokazilo, zkuste to znovu.");
+      return;
+    }
+
+    if (data.user && data.user.identities && data.user.identities.length === 0) {
+      setError("Tento email už je zaregistrovaný.");
+      return;
+    }
+
+    setSuccess(true);
   }
-
-  if (data.user && data.user.identities && data.user.identities.length === 0) {
-    setError("Tento email už je zaregistrovaný.");
-    return;
-  }
-
-  setSuccess(true);
-}
-
-
 
   if (success) {
     return (
@@ -202,7 +212,7 @@ export default function RegisterForm() {
         <div className="mt-4 sm:mx-auto sm:w-full sm:max-w-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-             <p className="text-sm text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-950/60 px-3 py-2 rounded-md flex flex-row gap-2 items-center">
+              <p className="text-sm text-red-700 bg-red-100 dark:text-red-400 dark:bg-red-950/60 px-3 py-2 rounded-md flex flex-row gap-2 items-center">
                 <CircleAlert className="h-5 w-5" />
                 {error}
               </p>
@@ -210,35 +220,46 @@ export default function RegisterForm() {
 
             <div>
               <label
-                htmlFor="displayName"
+                htmlFor="username"
                 className="block text-sm/6 font-bold dark:text-slate-300 text-stone-700"
               >
                 Uživatelské jméno
               </label>
               <div className="mt-2">
                 <input
-                  id="displayName"
+                  id="username"
                   type="text"
-                  placeholder="UzivatelskoJmeno"
-                  name="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="uzivatelske_jmeno"
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
                   required
-                  autoComplete="name"
-                  pattern="^[a-zA-Z0-9_.]{1,30}$"
-                  title="Uživatelské jméno může obsahovat pouze písmena, čísla, podtržítka a tečky. Maximální délka je 30 znaků."
-                  aria-invalid={usernameStatus === "taken"}
+                  autoComplete="username"
+                  minLength={3}
+                  maxLength={20}
+                  pattern="^[a-z0-9_]{3,20}$"
+                  title="Uživatelské jméno smí obsahovat pouze malá písmena, čísla a podtržítka. Délka 3–20 znaků."
+                  aria-invalid={
+                    usernameStatus === "taken" || usernameStatus === "invalid"
+                  }
                   className={
                     "block w-full rounded-md border px-3 py-1.5 text-base placeholder:text-gray-500 outline-none sm:text-sm/6 " +
-                    (usernameStatus === "taken"
+                    (usernameStatus === "taken" || usernameStatus === "invalid"
                       ? "border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500 dark:border-red-500 dark:bg-red-950/40 dark:text-red-100 dark:focus:border-red-500 dark:focus:ring-red-500"
                       : "border-stone-300 bg-white text-stone-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-2 dark:focus:ring-emerald-500")
                   }
                 />
               </div>
 
+              {usernameStatus === "invalid" && (
+                <p className="mt-1.5 text-sm text-red-700 dark:text-red-400 flex flex-row gap-2 items-center">
+                  <CircleAlert className="h-5 w-5" />
+                  Pouze malá písmena, čísla a podtržítka, 3–20 znaků.
+                </p>
+              )}
+
               {usernameStatus === "taken" && (
-                   <p className="text-sm text-red-700 dark:text-red-400   py-2 rounded-md flex flex-row gap-2 items-center">
+                <p className="mt-1.5 text-sm text-red-700 dark:text-red-400 flex flex-row gap-2 items-center">
                   <CircleAlert className="h-5 w-5" />
                   Uživatelské jméno není k dispozici.
                 </p>
@@ -253,6 +274,12 @@ export default function RegisterForm() {
               {usernameStatus === "checking" && (
                 <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
                   Kontroluji dostupnost…
+                </p>
+              )}
+
+              {usernameStatus === "error" && (
+                <p className="mt-1.5 text-sm text-red-700 dark:text-red-400">
+                  Kontrolu dostupnosti se nepodařilo provést, zkuste to znovu.
                 </p>
               )}
             </div>
@@ -301,11 +328,7 @@ export default function RegisterForm() {
             <div>
               <button
                 type="submit"
-                disabled={
-                  loading ||
-                  usernameStatus === "taken" ||
-                  usernameStatus === "checking"
-                }
+                disabled={loading || usernameStatus !== "available"}
                 className="flex w-full justify-center rounded-md bg-emerald-600 dark:hover:bg-emerald-500 hover:bg-emerald-700 transition-all duration-200 ease-in px-3 py-1.5 text-sm/6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? "Registruji…" : "Zaregistrovat se"}
