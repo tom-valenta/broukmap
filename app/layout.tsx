@@ -43,12 +43,8 @@ export default async function RootLayout({
   }
 
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
-      <body className="h-full flex flex-col">
+<html lang="cs" className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
+  <body className="min-h-dvh flex flex-col bg-[#fbfbf7] dark:bg-slate-950">
         <AuthProvider initialUser={user} initialProfile={profile}>
           <ThemeProvider
             attribute="class"
