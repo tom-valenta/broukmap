@@ -25,7 +25,7 @@ export default async function CompleteProfilePage() {
           <h1 className="text-center text-2xl/9 my-4 font-bold tracking-tight dark:text-white text-stone-900">
             Dokončete svůj profil
           </h1>
-          <p className="text-sm dark:*:text-slate-400 text-slate-600">
+          <p className="text-sm dark:text-slate-300 text-slate-600">
             Zadejte své jméno, které se bude zobrazovat ve vašem profilu.
           </p>
         </div>
