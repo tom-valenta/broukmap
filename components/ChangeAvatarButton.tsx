@@ -37,7 +37,7 @@ export default function ChangeAvatarButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="h-fit rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 cursor-pointer"
+        className="h-fit rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-emerald-700 cursor-pointer"
       >
         Změnit fotku
       </button>

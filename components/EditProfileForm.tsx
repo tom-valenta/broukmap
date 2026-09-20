@@ -35,7 +35,7 @@ export default function EditProfileForm({
   });
 
   return (
-    <form action={action} className="mt-8 space-y-5 ">
+    <form action={action} className="mt-4 space-y-5 ">
       <div className="space-y-1.5">
         <label
           htmlFor="display_name"
