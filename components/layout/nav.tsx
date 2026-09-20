@@ -119,13 +119,13 @@ export default function Navbar() {
           {/* Mobile search overlay: přes celý nav (logo i tlačítka), max prostor pro psaní */}
           {mobileSearchOpen && (
             <div className="lg:hidden absolute inset-0 z-30 flex items-center gap-2 px-3 sm:px-6 bg-white dark:bg-slate-950">
-              <div className="flex items-center gap-2 px-3 h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-stone-500 dark:text-slate-400 flex-1 min-w-0 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
+              <div className="flex items-center gap-2 px-3 h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-stone-700 dark:text-slate-400 flex-1 min-w-0 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
                 <Search className="w-4.5 h-4.5 shrink-0" />
                 <input
                   autoFocus
                   type="search"
                   placeholder="Hledat druh..."
-                  className="bg-transparent outline-none text-sm w-full min-w-0 placeholder:text-stone-500 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
+                  className="bg-transparent outline-none text-sm w-full min-w-0 placeholder:text-stone-700 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
                 />
               </div>
               <button
@@ -178,12 +178,12 @@ export default function Navbar() {
 
           {/* Desktop pravá strana */}
           <div className="hidden lg:flex items-center gap-1.5 xl:gap-3.5 shrink-0 ml-auto">
-            <div className="flex items-center gap-2.5 px-3 xl:px-4 h-10 xl:h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-stone-500 dark:text-slate-400 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
+            <div className="flex items-center gap-2.5 px-3 xl:px-4 h-10 xl:h-11 rounded-full border border-stone-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-stone-700 dark:text-slate-400 focus-within:border-emerald-600 dark:focus-within:border-emerald-500">
               <Search className="w-4.5 h-4.5 shrink-0" />
               <input
                 type="search"
                 placeholder="Hledat druh..."
-                className="bg-transparent outline-none text-sm w-20 xl:w-40 placeholder:text-stone-500 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
+                className="bg-transparent outline-none text-sm w-20 xl:w-40 placeholder:text-stone-700 dark:placeholder:text-slate-400 text-stone-900 dark:text-white"
               />
               <kbd className="hidden xl:inline text-xs font-medium text-stone-400 dark:text-slate-500">
                 ⌘K
@@ -208,7 +208,7 @@ export default function Navbar() {
                       <span className="block px-4 py-2 text-sm font-semibold text-stone-700 dark:text-slate-200">
                         Oznámení
                       </span>
-                      <div className="px-4 py-6 text-sm text-stone-500 dark:text-slate-400 text-center">
+                      <div className="px-4 py-6 text-sm text-stone-700 dark:text-slate-400 text-center">
                         Žádná nová oznámení
                       </div>
                     </div>
@@ -232,28 +232,28 @@ export default function Navbar() {
                       size={32}
                       className="w-8 h-8 rounded-full"
                     />
-                    <ChevronDown className="w-4.5 h-4.5 text-stone-500 dark:text-slate-400" />
+                    <ChevronDown className="w-4.5 h-4.5 text-stone-700 dark:text-slate-400" />
                   </button>
 
                   {menuOpen && (
                     <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl shadow-lg py-1.5 w-56 z-50">
                       <Link
                         href={`/profile/${username}`}
-                        className="block px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                        className="block px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
                       >
                         {username}
                       </Link>
 
                       <Link
                         href={`/profile/settings`}
-                        className="block px-4 py-2.5 text-sm text-stone-500 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                        className="block px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
                       >
                         Nastavení
                       </Link>
 
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800 border-t dark:border-slate-700 border-slate-300"
+                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-stone-400 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800 border-t dark:border-slate-700 border-slate-300"
                       >
                         Odhlásit se
                       </button>
@@ -397,7 +397,7 @@ export default function Navbar() {
               </button>
 
               {notifOpen && (
-                <div className="mx-4 mt-1 mb-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-6 text-sm text-stone-500 dark:text-slate-400 text-center">
+                <div className="mx-4 mt-1 mb-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-6 text-sm text-stone-700 dark:text-slate-400 text-center">
                   Žádná nová oznámení
                 </div>
               )}
@@ -432,14 +432,14 @@ export default function Navbar() {
                   className={
                     active
                       ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400"
-                      : "w-5 h-5 sm:w-6 sm:h-6 text-stone-500 dark:text-slate-400"
+                      : "w-5 h-5 sm:w-6 sm:h-6 text-stone-700 dark:text-slate-400"
                   }
                 />
                 <span
                   className={
                     active
                       ? "text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400"
-                      : "text-xs sm:text-sm font-medium text-stone-500 dark:text-slate-400"
+                      : "text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-400"
                   }
                 >
                   {link.label}
