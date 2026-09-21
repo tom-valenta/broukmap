@@ -177,9 +177,9 @@ export default async function HomePage() {
       </section>
 
       {/* Proč mapovat s námi */}
-      <section className="bg-stone-100 px-5 md:px-10 lg:px-16 dark:bg-slate-900 border-y dark:border-slate-800">
+      <section className="bg-stone-100 px-5 md:px-10 lg:px-16 dark:bg-slate-900 border-y border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto py-12 md:py-20">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-10">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 pb-10 text-center md:text-left">
             <div className="flex flex-col gap-2">
               <p className="font-semibold dark:text-emerald-500 text-emerald-600 uppercase tracking-wide">
                 Jednoduchý proces
