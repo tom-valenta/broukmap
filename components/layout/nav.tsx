@@ -115,7 +115,7 @@ export default function Navbar() {
   return (
     <>
       <div className="w-full relative z-40">
-<nav className="relative w-full min-h-20 pt-[env(safe-area-inset-top)] bg-white dark:bg-slate-950 backdrop-blur-md border-b border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
+        <nav className="relative w-full min-h-20 pt-[env(safe-area-inset-top)] bg-white dark:bg-slate-950 backdrop-blur-md border-b border-stone-200/90 dark:border-slate-800 px-3 sm:px-6 flex items-center justify-between gap-2 shadow-sm">
           {/* Mobile search overlay: přes celý nav (logo i tlačítka), max prostor pro psaní */}
           {mobileSearchOpen && (
             <div className="lg:hidden absolute inset-0 z-30 flex items-center gap-2 px-3 sm:px-6 bg-white dark:bg-slate-950">
