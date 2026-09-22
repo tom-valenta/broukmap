@@ -20,6 +20,7 @@ import {
   X,
   LogOutIcon,
   Home,
+  ShieldCheck,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -28,7 +29,7 @@ export default function Navbar() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [hamburgerOpen, setHamburgerOpen] = useState(false);
 
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const username = profile?.username ?? null;
 
   const pathname = usePathname();
@@ -192,6 +193,16 @@ export default function Navbar() {
 
             <ThemeToggle />
 
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="hidden xl:flex w-11 h-11 items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800"
+                aria-label="Admin dashboard"
+              >
+                <ShieldCheck className="w-5 h-5" />
+              </Link>
+            )}
+
             {user ? (
               <>
                 <div className="hidden xl:block relative" ref={notifRef}>
@@ -250,6 +261,16 @@ export default function Navbar() {
                       >
                         Nastavení
                       </Link>
+
+                      {isAdmin && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                        >
+                          <ShieldCheck className="w-4.5 h-4.5" />
+                          Admin dashboard
+                        </Link>
+                      )}
 
                       <button
                         onClick={handleLogout}
@@ -381,6 +402,17 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={() => setHamburgerOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900"
+              >
+                <ShieldCheck className="w-4.5 h-4.5" />
+                Admin dashboard
+              </Link>
+            )}
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 

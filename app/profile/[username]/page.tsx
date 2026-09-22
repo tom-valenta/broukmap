@@ -4,6 +4,7 @@ import ProfileFindingsSection from "@/components/ProfileFindingsSection";
 import HeroCard from "@/components/HeroCard";
 import { getCurrentUserId, getUserByUsername } from "@/lib/user";
 import ProfileHeaderCard from "@/components/ProfileHeaderCard";
+import UserSearchBar from "../ProfileSearchBar";
 import {
   AlertTriangleIcon,
   CheckCircleIcon,
@@ -13,7 +14,6 @@ import {
 } from "lucide-react";
 
 /* ---------- shared class strings (same palette as the homepage) ---------- */
-
 
 const pageBtnBase =
   "flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors";
@@ -44,7 +44,12 @@ export default async function ProfilePage({
       {/* Hlavička profilu + statistiky */}
       <section className="px-5 md:px-10 lg:px-16 py-12 lg:py-24 bg-linear-to-b from-[#f6f7f1] via-emerald-50 to-stone-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
         <div className="max-w-7xl mx-auto">
-          <ProfileHeaderCard profile={profileUser} isOwnProfile={isOwnProfile} />
+          <UserSearchBar />
+
+          <ProfileHeaderCard
+            profile={profileUser}
+            isOwnProfile={isOwnProfile}
+          />
 
           <div className="py-8 md:py-16">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-stretch">
@@ -85,7 +90,11 @@ export default async function ProfilePage({
       <ProfileFindingsSection />
 
       {/* Synchronizace + stránkování */}
-      <section className={"w-full bg-stone-100 dark:bg-slate-900 border-y border-stone-300 dark:border-slate-800 py-5 px-5 md:px-10 lg:px-16"}>
+      <section
+        className={
+          "w-full bg-stone-100 dark:bg-slate-900 border-y border-stone-300 dark:border-slate-800 py-5 px-5 md:px-10 lg:px-16"
+        }
+      >
         <div className="w-full flex flex-col lg:flex-row max-w-7xl mx-auto justify-between items-center gap-4 lg:gap-6">
           <div className="min-w-0 flex flex-row gap-2 items-center text-sm text-left text-stone-700 dark:text-slate-300">
             <RefreshCwIcon className="w-5 h-5 shrink-0 text-emerald-700 dark:text-emerald-500" />
@@ -117,16 +126,24 @@ export default async function ProfilePage({
             </li>
 
             <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>2</button>
+              <button type="button" className={pageBtnIdle}>
+                2
+              </button>
             </li>
             <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>3</button>
+              <button type="button" className={pageBtnIdle}>
+                3
+              </button>
             </li>
             <li className="shrink-0 hidden sm:block">
-              <span className="flex items-center justify-center w-9 h-9 text-sm text-stone-400 dark:text-slate-500">...</span>
+              <span className="flex items-center justify-center w-9 h-9 text-sm text-stone-400 dark:text-slate-500">
+                ...
+              </span>
             </li>
             <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>48</button>
+              <button type="button" className={pageBtnIdle}>
+                48
+              </button>
             </li>
 
             <li className="shrink-0">

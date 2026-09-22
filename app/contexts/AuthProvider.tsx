@@ -6,10 +6,13 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+
+type ProfileRole = "user" | "moderator" | "admin";
 
 type Profile = {
   id: string;
@@ -17,12 +20,15 @@ type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   has_set_username: boolean;
+  role: ProfileRole;
 };
 
 type AuthContextValue = {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  isAdmin: boolean;
+  isModeratorOrAdmin: boolean;
   refreshProfile: () => Promise<void>;
 };
 
@@ -45,7 +51,7 @@ export function AuthProvider({
     const supabase = createClient();
     const { data } = await supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url, has_set_username")
+      .select("id, username, display_name, avatar_url, has_set_username, role")
       .eq("id", userId)
       .single();
     setProfile(data ?? null);
@@ -77,11 +83,19 @@ export function AuthProvider({
     return () => listener.subscription.unsubscribe();
   }, [fetchProfile]);
 
-  return (
-    <AuthContext.Provider value={{ user, profile, loading, refreshProfile }}>
-      {children}
-    </AuthContext.Provider>
-  );
+const isAdmin = useMemo(() => profile?.role === "admin", [profile]);
+const isModeratorOrAdmin = useMemo(
+  () => profile?.role === "admin" || profile?.role === "moderator",
+  [profile]
+);
+
+return (
+  <AuthContext.Provider
+    value={{ user, profile, loading, isAdmin, isModeratorOrAdmin, refreshProfile }}
+  >
+    {children}
+  </AuthContext.Provider>
+);
 }
 
 export function useAuth() {

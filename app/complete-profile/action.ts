@@ -1,52 +1,67 @@
-"use server"
+"use server";
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/server";
 
 export async function completeProfile(formData: FormData) {
-  const username = formData.get("username") as string
+  const username = String(formData.get("username") ?? "")
+    .trim()
+    .toLowerCase();
 
-  if (!username || username.trim().length < 3) {
-    return { error: "Uživatelské jméno musí mít alespoň 3 znaky" }
+  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+    return { error: "Neplatné uživatelské jméno" };
   }
 
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Nejsi přihlášen" }
+    return { error: "Nejsi přihlášen" };
   }
 
-  // nový check – zabrání opětovnému nastavení username
-  const { data: currentProfile } = await supabase
+  const { data: currentProfile, error: profileError } = await supabase
     .from("profiles")
     .select("has_set_username")
     .eq("id", user.id)
-    .single()
+    .single();
 
-  if (currentProfile?.has_set_username) {
-    return { error: "Uživatelské jméno už bylo nastaveno" }
+  if (profileError || currentProfile?.has_set_username) {
+    return { error: "Uživatelské jméno už bylo nastaveno" };
   }
 
-  const { data: existing } = await supabase
+  // Rychlý UX feedback – nechává se, ale nechrání proti race condition
+  const { data: existing, error: existingError } = await supabase
     .from("profiles")
     .select("id")
     .eq("username", username)
     .neq("id", user.id)
-    .maybeSingle()
+    .maybeSingle();
+
+  if (existingError) {
+    return { error: "Nepodařilo se ověřit dostupnost jména" };
+  }
 
   if (existing) {
-    return { error: "Toto uživatelské jméno už je obsazené" }
+    return { error: "Toto uživatelské jméno už je obsazené" };
   }
 
-  const { data: updated, error } = await supabase
+  const { error: updateError } = await supabase
     .from("profiles")
-    .update({ username: username, has_set_username: true }) // <- doplněno has_set_username
-    .eq("id", user.id)
-    .select()
+    .update({
+      username,
+      has_set_username: true,
+    })
+    .eq("id", user.id);
 
-  if (error || !updated || updated.length === 0) {
-    return { error: "Něco se pokazilo, zkus to znovu" }
+  if (updateError) {
+    // Skutečná ochrana proti race condition – DB UNIQUE constraint
+    if (updateError.code === "23505") {
+      return { error: "Toto uživatelské jméno už je obsazené" };
+    }
+    return { error: "Něco se pokazilo, zkus to znovu" };
   }
 
-  return { success: true }
+  return { success: true };
 }
