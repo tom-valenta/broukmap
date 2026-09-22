@@ -7,7 +7,6 @@ import Navbar from "@/components/layout/nav";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,8 +16,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-
 
 export const metadata: Metadata = {
   title: "BroukMap",
@@ -30,8 +27,6 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
 };
-
-
 
 export default async function RootLayout({
   children,
@@ -47,7 +42,7 @@ export default async function RootLayout({
   if (user) {
     const { data } = await supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url, has_set_username")
+      .select("id, username, display_name, avatar_url, has_set_username, role")
       .eq("id", user.id)
       .single();
     profile = data;
