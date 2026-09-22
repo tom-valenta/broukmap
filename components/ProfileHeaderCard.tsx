@@ -53,12 +53,13 @@ export default function ProfileHeaderCard({
 
   const isAdmin = role === "admin";
 
-  const memberSince = created_at
-    ? new Date(created_at).toLocaleDateString(undefined, {
-        month: "long",
-        year: "numeric",
-      })
-    : null;
+const memberSince = created_at
+  ? new Date(created_at).toLocaleDateString("cs-CZ", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    })
+  : null;
 
   return (
     <div className="w-full max-w-7xl mx-auto rounded-3xl border border-stone-200 dark:border-slate-500 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
