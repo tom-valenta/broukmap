@@ -16,6 +16,17 @@ export async function completeProfile(formData: FormData) {
     return { error: "Nejsi přihlášen" }
   }
 
+  // nový check – zabrání opětovnému nastavení username
+  const { data: currentProfile } = await supabase
+    .from("profiles")
+    .select("has_set_username")
+    .eq("id", user.id)
+    .single()
+
+  if (currentProfile?.has_set_username) {
+    return { error: "Uživatelské jméno už bylo nastaveno" }
+  }
+
   const { data: existing } = await supabase
     .from("profiles")
     .select("id")
@@ -29,7 +40,7 @@ export async function completeProfile(formData: FormData) {
 
   const { data: updated, error } = await supabase
     .from("profiles")
-    .update({ username: username })
+    .update({ username: username, has_set_username: true }) // <- doplněno has_set_username
     .eq("id", user.id)
     .select()
 
