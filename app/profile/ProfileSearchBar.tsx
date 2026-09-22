@@ -17,7 +17,7 @@ export default function UserSearchBar() {
   const router = useRouter();
 
   useEffect(() => {
-    if (query.trim().length < 2) {
+    if (query.trim().length < 3) {
       setResults([]);
       setOpen(false);
       setLoading(false);
