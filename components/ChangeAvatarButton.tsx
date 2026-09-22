@@ -25,60 +25,85 @@ export default function ChangeAvatarButton({
   }, [open]);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  const file = e.target.files?.[0];
+  e.target.value = "";
+  if (!file) return;
 
-    setError(null);
-    setUploading(true);
-    setOpen(false);
+  setError(null);
+  setUploading(true);
+  setOpen(false);
 
-    try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Nepřihlášen");
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Nepřihlášen");
 
-      const prepared = await prepareAvatarFile(file);
-      const path = `${user.id}/avatar.${avatarExtension(prepared)}`;
+    const prepared = await prepareAvatarFile(file);
+    const path = `${user.id}/avatar.${avatarExtension(prepared)}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(path, prepared, {
-          upsert: true,
-          contentType: prepared.type,
-          cacheControl: "3600",
-        });
+    // Smazat staré avatary uživatele (jiné přípony by jinak zůstaly osiřelé)
+    const { data: existingFiles } = await supabase.storage
+      .from("avatars")
+      .list(user.id);
 
-      if (uploadError) throw uploadError;
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(path);
-
-      await updateAvatarUrl(`${publicUrl}?v=${Date.now()}`);
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof AvatarFileError
-          ? err.message
-          : "Nahrání se nepovedlo, zkuste to prosím znovu."
-      );
-    } finally {
-      setUploading(false);
+    if (existingFiles && existingFiles.length > 0) {
+      const pathsToRemove = existingFiles.map((f) => `${user.id}/${f.name}`);
+      await supabase.storage.from("avatars").remove(pathsToRemove);
     }
-  }
 
-  async function handleRemove() {
-    setOpen(false);
-    try {
-      await updateAvatarUrl(null);
-      router.refresh();
-    } catch {
-      setError("Odebrání se nepovedlo.");
-    }
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, prepared, {
+        upsert: true,
+        contentType: prepared.type,
+        cacheControl: "3600",
+      });
+
+    if (uploadError) throw uploadError;
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("avatars").getPublicUrl(path);
+
+    await updateAvatarUrl(`${publicUrl}?v=${Date.now()}`);
+    router.refresh();
+  } catch (err) {
+    setError(
+      err instanceof AvatarFileError
+        ? err.message
+        : "Nahrání se nepovedlo, zkuste to prosím znovu."
+    );
+  } finally {
+    setUploading(false);
   }
+}
+
+async function handleRemove() {
+  setOpen(false);
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Nepřihlášen");
+
+    const { data: existingFiles } = await supabase.storage
+      .from("avatars")
+      .list(user.id);
+
+    if (existingFiles && existingFiles.length > 0) {
+      const pathsToRemove = existingFiles.map((f) => `${user.id}/${f.name}`);
+      await supabase.storage.from("avatars").remove(pathsToRemove);
+    }
+
+    await updateAvatarUrl(null);
+    router.refresh();
+  } catch {
+    setError("Odebrání se nepovedlo.");
+  }
+}
 
   const row =
     "w-full border-t border-stone-200 px-4 py-3.5 text-sm dark:border-slate-700";
