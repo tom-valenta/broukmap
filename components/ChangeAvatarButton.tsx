@@ -24,7 +24,7 @@ export default function ChangeAvatarButton({
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
   const file = e.target.files?.[0];
   e.target.value = "";
   if (!file) return;
@@ -43,16 +43,7 @@ export default function ChangeAvatarButton({
     const prepared = await prepareAvatarFile(file);
     const path = `${user.id}/avatar.${avatarExtension(prepared)}`;
 
-    // Smazat staré avatary uživatele (jiné přípony by jinak zůstaly osiřelé)
-    const { data: existingFiles } = await supabase.storage
-      .from("avatars")
-      .list(user.id);
-
-    if (existingFiles && existingFiles.length > 0) {
-      const pathsToRemove = existingFiles.map((f) => `${user.id}/${f.name}`);
-      await supabase.storage.from("avatars").remove(pathsToRemove);
-    }
-
+    // 1. Nahrát nový avatar (upsert přepíše, pokud je stejná cesta/přípona)
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(path, prepared, {
@@ -67,8 +58,33 @@ export default function ChangeAvatarButton({
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(path);
 
+    // 2. Uložit novou URL do profilu — teprve teď je nový avatar "aktivní"
     await updateAvatarUrl(`${publicUrl}?v=${Date.now()}`);
     router.refresh();
+
+    // 3. Cleanup — smazat staré soubory (jiná přípona), ale nechat ten nový
+    const { data: existingFiles, error: listError } = await supabase.storage
+      .from("avatars")
+      .list(user.id);
+
+    if (listError) {
+      console.error("Avatar cleanup - list failed:", listError);
+    } else {
+      const oldPaths =
+        existingFiles
+          ?.map((f) => `${user.id}/${f.name}`)
+          .filter((filePath) => filePath !== path) ?? [];
+
+      if (oldPaths.length > 0) {
+        const { error: removeError } = await supabase.storage
+          .from("avatars")
+          .remove(oldPaths);
+
+        if (removeError) {
+          console.error("Avatar cleanup - remove failed:", removeError);
+        }
+      }
+    }
   } catch (err) {
     setError(
       err instanceof AvatarFileError
@@ -89,17 +105,30 @@ async function handleRemove() {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Nepřihlášen");
 
-    const { data: existingFiles } = await supabase.storage
+    // 1. Nejdřív odstranit odkaz z profilu — tohle je to, co uživatel vidí
+    await updateAvatarUrl(null);
+    router.refresh();
+
+    // 2. Pak uklidit Storage — selhání zde už nezablokuje odebrání fotky z profilu
+    const { data: existingFiles, error: listError } = await supabase.storage
       .from("avatars")
       .list(user.id);
 
-    if (existingFiles && existingFiles.length > 0) {
-      const pathsToRemove = existingFiles.map((f) => `${user.id}/${f.name}`);
-      await supabase.storage.from("avatars").remove(pathsToRemove);
+    if (listError) {
+      console.error("Avatar removal - list failed:", listError);
+      return;
     }
 
-    await updateAvatarUrl(null);
-    router.refresh();
+    if (existingFiles && existingFiles.length > 0) {
+      const pathsToRemove = existingFiles.map((f) => `${user.id}/${f.name}`);
+      const { error: removeError } = await supabase.storage
+        .from("avatars")
+        .remove(pathsToRemove);
+
+      if (removeError) {
+        console.error("Avatar removal - remove failed:", removeError);
+      }
+    }
   } catch {
     setError("Odebrání se nepovedlo.");
   }
