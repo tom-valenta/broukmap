@@ -7,9 +7,9 @@ export async function completeProfile(formData: FormData) {
     .trim()
     .toLowerCase();
 
-  if (!/^[a-z0-9_]{3,20}$/.test(username)) {
-    return { error: "Neplatné uživatelské jméno" };
-  }
+if (!/^(?!.*\.\.)[a-z0-9_][a-z0-9_.]{1,18}[a-z0-9_]$/.test(username)) {
+  return { error: "Neplatné uživatelské jméno" };
+}
 
   const supabase = await createClient();
 

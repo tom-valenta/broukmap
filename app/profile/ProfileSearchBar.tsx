@@ -17,7 +17,7 @@ export default function UserSearchBar() {
   const router = useRouter();
 
   useEffect(() => {
-    if (query.trim().length === 0) {
+    if (query.trim().length < 2) {
       setResults([]);
       setOpen(false);
       setLoading(false);
@@ -25,16 +25,22 @@ export default function UserSearchBar() {
       return;
     }
 
+    let cancelled = false;
     setLoading(true);
+
     const timeout = setTimeout(async () => {
-      const users = await searchUsers(query);
+      const users = await searchUsers(query.trim());
+      if (cancelled) return;
       setResults(users);
       setOpen(true);
       setLoading(false);
       setActiveIndex(-1);
     }, 300);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [query]);
 
   useEffect(() => {
@@ -98,7 +104,7 @@ export default function UserSearchBar() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => query.trim().length > 0 && setOpen(true)}
+          onFocus={() => query.trim().length >= 2 && setOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder="Hledat uživatele podle jména..."
           className="w-full bg-transparent text-sm text-stone-700 placeholder:text-slate-400

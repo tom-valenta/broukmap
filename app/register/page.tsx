@@ -9,7 +9,7 @@ import { CircleAlert } from "lucide-react";
 
 // Must match the DB constraint exactly: profiles_username_format
 // check (username ~ '^[a-z0-9_]{3,20}$')
-const USERNAME_REGEX = /^[a-z0-9_]{3,20}$/;
+const USERNAME_REGEX = /^(?!.*\.\.)[a-z0-9_][a-z0-9_.]{1,18}[a-z0-9_]$/;
 
 export default function RegisterForm() {
   const [loading, setLoading] = useState(false);

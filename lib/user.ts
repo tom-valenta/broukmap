@@ -24,6 +24,8 @@ export async function getProfileById(id: string) {
   return data;
 }
 
+
+
 export async function getCurrentUserId() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
@@ -63,3 +65,4 @@ export async function updateDisplayName(formData: FormData) {
   revalidatePath(`/profile/${data.username}`);
   redirect(`/profile/${data.username}`);
 }
+
