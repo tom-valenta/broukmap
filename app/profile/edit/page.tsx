@@ -1,10 +1,7 @@
 import { redirect } from "next/navigation";
 import UserAvatar from "@/components/UserAvatar";
-import {
-  getCurrentUserId,
-  getProfileById,
-  updateDisplayName,
-} from "@/lib/user";
+import { getCurrentUserId, getProfileById } from "@/lib/user";
+import { updateProfile } from "@/lib/actions";
 import ChangeAvatarButton from "@/components/ChangeAvatarButton";
 import EditProfileForm from "@/components/EditProfileForm";
 import { X } from "lucide-react";
@@ -61,7 +58,7 @@ export default async function EditProfile() {
         </div>
 
         <EditProfileForm
-          action={updateDisplayName}
+          action={updateProfile}
           username={profile.username}
           displayName={profile.display_name}
           bio={profile.bio}

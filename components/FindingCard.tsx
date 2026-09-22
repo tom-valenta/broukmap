@@ -1,5 +1,6 @@
 // components/FindingCard.tsx
 import { CheckCircle2, MapPin } from "lucide-react";
+import Image from "next/image";
 
 interface FindingCardProps {
   imageUrl: string;
