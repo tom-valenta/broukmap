@@ -13,7 +13,7 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
+  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "invalid" | "checking" | "available" | "taken" | "error"
@@ -71,17 +71,13 @@ export default function RegisterForm() {
 
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    // password bereme ze stavu
-
     const supabase = createClient();
 
     // Uživatelské jméno kontrolujeme průběžně (usernameStatus), ale těsně
     // před odesláním to ověříme ještě jednou pro jistotu (race condition).
     const { data: available, error: checkError } = await supabase.rpc(
       "is_username_available",
-      { desired_username: username }
+      { desired_username: username },
     );
 
     if (checkError) {
@@ -110,14 +106,24 @@ export default function RegisterForm() {
     setLoading(false);
 
     if (error) {
-      console.log("AUTH ERROR:", error.message, error.code, error.status, error);
+      console.log(
+        "AUTH ERROR:",
+        error.message,
+        error.code,
+        error.status,
+        error,
+      );
       // Sem už by se v běžném provozu skoro nikdy nemělo dostat kvůli username,
       // jen při race condition. Obecná hláška je v pořádku.
       setError("Něco se pokazilo, zkuste to znovu.");
       return;
     }
 
-    if (data.user && data.user.identities && data.user.identities.length === 0) {
+    if (
+      data.user &&
+      data.user.identities &&
+      data.user.identities.length === 0
+    ) {
       setError("Tento email už je zaregistrovaný.");
       return;
     }
@@ -307,6 +313,8 @@ export default function RegisterForm() {
                   type="email"
                   placeholder="vas@email.cz"
                   name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
                   className="block w-full rounded-md border border-stone-300 bg-white px-3 py-1.5 text-base text-stone-900 placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-2 dark:focus:ring-emerald-500 sm:text-sm/6"
