@@ -213,7 +213,7 @@ const bottomNavLinks: BottomNavLink[] = [
                     onClick={() => setNotifOpen((open) => !open)}
                     className="relative w-11 h-11 flex items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800"
                   >
-                    <Bell className="w-5 h-5" />
+                    <Bell className="w-5 h-5 cursor-pointer" />
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-emerald-500" />
                   </button>
 

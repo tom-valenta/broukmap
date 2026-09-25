@@ -19,7 +19,7 @@ export function ThemeToggle() {
       aria-label="Přepnout téma"
       className="relative w-16 h-8 rounded-full border transition-colors duration-300
                  bg-stone-100 border-stone-300
-                 dark:bg-slate-800 dark:border-slate-700"
+                 dark:bg-slate-800 dark:border-slate-700 cursor-pointer"
     >
       <span
         className={`absolute top-0.5 left-0.5 w-7 h-7 rounded-full shadow-md
