@@ -13,14 +13,18 @@ import {
   Bell,
   ChevronDown,
   Map,
-  BookOpen,
-  Zap,
   UserRound,
   Menu,
   X,
   LogOutIcon,
   Home,
   ShieldCheck,
+  PlusIcon,
+  SettingsIcon,
+  UserIcon,
+  LucideIcon,
+  Plus,
+  BellIcon,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -104,14 +108,23 @@ export default function Navbar() {
     { href: "/statistiky", label: "Statistiky" },
   ];
 
-  // spodní quick menu pro mobil
-  const bottomNavLinks = [
-    { href: "/", label: "Domů", icon: Home },
-    { href: "/map", label: "Mapa", icon: Map },
-    { href: "/atlas", label: "Atlas", icon: BookOpen },
-    { href: "/aktivita", label: "Aktivita", icon: Zap },
-    { href: `/profile/${username}`, label: "Profil", icon: UserRound },
-  ];
+
+  type BottomNavLink = {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  primary?: boolean;
+};
+
+
+
+const bottomNavLinks: BottomNavLink[] = [
+  { href: "/", label: "Domů", icon: Home },
+  { href: "/map", label: "Mapa", icon: Map },
+  { href: "/pridat", label: "Přidat nález", icon: PlusIcon, primary: true },
+  { href: "/aktivita", label: "Upozornění", icon: BellIcon },
+  { href: `/profile/${username}`, label: "Profil", icon: UserRound },
+];
 
   return (
     <>
@@ -193,16 +206,6 @@ export default function Navbar() {
 
             <ThemeToggle />
 
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="hidden xl:flex w-11 h-11 items-center justify-center rounded-full text-stone-600 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-800"
-                aria-label="Admin dashboard"
-              >
-                <ShieldCheck className="w-5 h-5" />
-              </Link>
-            )}
-
             {user ? (
               <>
                 <div className="hidden xl:block relative" ref={notifRef}>
@@ -236,7 +239,7 @@ export default function Navbar() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setMenuOpen((open) => !open)}
-                    className="flex items-center gap-1.5 pl-1.5 pr-2 h-10 xl:h-11 rounded-full hover:bg-stone-100 dark:hover:bg-slate-800"
+                    className="flex items-center gap-1.5 pl-1.5 pr-2 h-10 xl:h-11 rounded-full hover:bg-stone-100 dark:hover:bg-slate-800  cursor-pointer"
                   >
                     <UserAvatar
                       profile={profile}
@@ -250,16 +253,16 @@ export default function Navbar() {
                     <div className="absolute top-full right-0 mt-2 bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-xl shadow-lg py-1.5 w-56 z-50">
                       <Link
                         href={`/profile/${username}`}
-                        className="block px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                        className="flex flex-row gap-2 px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
                       >
-                        {username}
+                        <UserIcon className="w-4.5 h-4.5" /> {username}
                       </Link>
 
                       <Link
                         href={`/profile/settings`}
-                        className="block px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800"
+                        className=" px-4 py-2.5 text-sm text-stone-700 dark:text-slate-400 truncate hover:bg-stone-50 dark:hover:bg-slate-800 flex flex-row gap-2"
                       >
-                        Nastavení
+                        <SettingsIcon className="w-4.5 h-4.5" /> Nastavení
                       </Link>
 
                       {isAdmin && (
@@ -274,9 +277,9 @@ export default function Navbar() {
 
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2.5 text-sm font-medium text-stone-400 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800 border-t dark:border-slate-700 border-slate-300"
+                        className=" flex flex-row w-full text-left px-4 py-2.5 text-sm font-medium text-stone-400 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-800 border-t dark:border-slate-700 border-slate-300 gap-2 cursor-pointer"
                       >
-                        Odhlásit se
+                        <LogOutIcon className="w-4.5 h-4.5" /> Odhlásit se
                       </button>
                     </div>
                   )}
@@ -314,13 +317,6 @@ export default function Navbar() {
                   </button>
 
                   <ThemeToggle />
-
-                  <Link
-                    href="/pridat"
-                    className="h-9 px-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs sm:text-sm font-medium flex items-center gap-1 whitespace-nowrap shrink-0"
-                  >
-                    + Nález
-                  </Link>
 
                   <button
                     onClick={() => setHamburgerOpen((open) => !open)}
@@ -375,22 +371,8 @@ export default function Navbar() {
           <div
             id="mobile-hamburger-panel"
             ref={hamburgerRef}
-            className="lg:hidden w-full bg-white dark:bg-slate-950 border-x border-b border-stone-200/90 dark:border-slate-800 shadow-sm px-4 py-4 flex flex-col gap-1"
+            className="lg:hidden w-full bg-white dark:bg-slate-950 border-b border-stone-200/90 dark:border-slate-800 shadow-sm px-4 py-4 flex flex-col gap-1"
           >
-            <div className="flex items-center gap-2.5 px-4 py-2">
-              <UserAvatar
-                profile={profile}
-                size={32}
-                className="w-8 h-8 rounded-full"
-              />
-              <Link
-                href={`/profile/${username}`}
-                onClick={() => setHamburgerOpen(false)}
-                className="text-sm text-stone-600 dark:text-slate-300 truncate hover:underline"
-              >
-                {username ?? user.email}
-              </Link>
-            </div>
 
             {hamburgerExtraLinks.map((link) => (
               <Link
@@ -414,26 +396,7 @@ export default function Navbar() {
               </Link>
             )}
 
-            <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
-            <div ref={mobileNotifRef}>
-              <button
-                onClick={() => setNotifOpen((open) => !open)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-stone-600 dark:text-slate-300 hover:bg-stone-50 dark:hover:bg-slate-900"
-              >
-                <span className="flex items-center gap-2">
-                  <Bell className="w-4.5 h-4.5" />
-                  Oznámení
-                </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              </button>
-
-              {notifOpen && (
-                <div className="mx-4 mt-1 mb-2 rounded-xl border border-stone-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-6 text-sm text-stone-700 dark:text-slate-400 text-center">
-                  Žádná nová oznámení
-                </div>
-              )}
-            </div>
 
             <div className="my-2 border-t border-stone-200 dark:border-slate-800" />
 
@@ -458,24 +421,29 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-label={link.label || "Přidat nález"}
                 className="flex-1 flex flex-col items-center gap-0.5 py-1.5 sm:py-2 rounded-full"
               >
                 <Icon
                   className={
-                    active
-                      ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400"
-                      : "w-5 h-5 sm:w-6 sm:h-6 text-stone-700 dark:text-slate-400"
+                    link.primary
+                      ? " w-9 h-9 sm:w-9 sm:h-9   rounded-full dark:bg-slate-900/90 dark:text-white text-stone-700 bg-slate-100/90 shadow-lg "
+                      : active
+                        ? "w-5 h-5 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400"
+                        : "w-5 h-5 sm:w-6 sm:h-6 text-stone-700 dark:text-slate-400"
                   }
                 />
-                <span
-                  className={
-                    active
-                      ? "text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400"
-                      : "text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-400"
-                  }
-                >
-                  {link.label}
-                </span>
+                {!link.primary && (
+                  <span
+                    className={
+                      active
+                        ? "text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400"
+                        : "text-xs sm:text-sm font-medium text-stone-700 dark:text-slate-400"
+                    }
+                  >
+                    {link.label}
+                  </span>
+                )}
               </Link>
             );
           })}
