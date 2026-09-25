@@ -7,7 +7,11 @@ import ProfileHeaderCard from "@/components/ProfileHeaderCard";
 import UserSearchBar from "../ProfileSearchBar";
 import {
   AlertTriangleIcon,
+  BadgeCheck,
+  Bug,
+  Camera,
   CheckCircleIcon,
+  HandHelping,
   MapIcon,
   RefreshCwIcon,
   UsersIcon,
@@ -54,32 +58,32 @@ export default async function ProfilePage({
           <div className="py-8 md:py-16">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-stretch">
               <HeroCard
-                icon={MapIcon}
+                icon={Camera}
                 iconColor="dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800 bg-emerald-100 text-stone-800 border-emerald-300"
-                number="14 850"
-                title="Zmapovaných nálezů"
-                description="z celého území ČR"
+                number="5"
+                title="Nahraných nálezů"
+                description=""
               />
               <HeroCard
-                icon={UsersIcon}
+                icon={Bug}
                 iconColor="dark:bg-lime-950/50 dark:text-lime-400 dark:border-lime-300/30 bg-lime-100 text-stone-800 border-lime-300"
-                number="1 420"
-                title="Terénních mapovatelů"
-                description="amatérů i profesionálů"
+                number="10"
+                title="Zdokumentovaných druhů"
+                description=""
               />
               <HeroCard
-                icon={CheckCircleIcon}
+                icon={HandHelping}
                 iconColor="dark:bg-teal-950/50 dark:text-teal-400 dark:border-teal-800 bg-teal-100 text-stone-800 border-teal-300"
-                number="100%"
-                title="Kontrola komunitou"
-                description="pro správné určení"
+                number="120"
+                title="Navržených určení"
+                description="pro 100 pozorovatelů"
               />
               <HeroCard
-                icon={AlertTriangleIcon}
+                icon={BadgeCheck}
                 iconColor="dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-300/30 bg-amber-100 text-stone-800 border-amber-300"
-                number="182"
-                title="Ohrožených druhů"
-                description="přidáno do NDOP pro ochranu"
+                number="34"
+                title="Potvrzených určení"
+               
               />
             </div>
           </div>

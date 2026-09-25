@@ -7,49 +7,60 @@ import { AppleIcon } from "@/components/icons/AppleIcon";
 import { GoogleIcon } from "@/components/icons/GoogleIcon";
 import { CircleAlert } from "lucide-react";
 
-// Must match the DB constraint exactly: profiles_username_format
-// check (username ~ '^[a-z0-9_]{3,20}$')
 const USERNAME_REGEX = /^(?!.*\.\.)[a-z0-9_][a-z0-9_.]{1,18}[a-z0-9_]$/;
 
 export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
+  const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [usernameStatus, setUsernameStatus] = useState<
     "idle" | "invalid" | "checking" | "available" | "taken" | "error"
   >("idle");
 
-  useEffect(() => {
-    if (username.length === 0) {
-      setUsernameStatus("idle");
-      return;
-    }
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-    if (!USERNAME_REGEX.test(username)) {
-      setUsernameStatus("invalid");
-      return;
-    }
+  const passwordsMismatch =
+    confirmPassword.length > 0 && password !== confirmPassword;
 
-    setUsernameStatus("checking");
+useEffect(() => {
+  if (username.length === 0) {
+    setUsernameStatus("idle");
+    return;
+  }
 
-    const timeout = setTimeout(async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc("is_username_available", {
-        desired_username: username,
-      });
+  if (!USERNAME_REGEX.test(username)) {
+    setUsernameStatus("invalid");
+    return;
+  }
 
-      if (error) {
-        setUsernameStatus("error");
-        return;
-      }
+  setUsernameStatus("checking");
 
-      setUsernameStatus(data ? "available" : "taken");
-    }, 400);
+  const controller = new AbortController();
 
-    return () => clearTimeout(timeout);
-  }, [username]);
+const timeout = setTimeout(async () => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .rpc("is_username_available", { desired_username: username })
+    .abortSignal(controller.signal);
+
+  if (controller.signal.aborted) return;
+
+  if (error) {
+    setUsernameStatus("error");
+    return;
+  }
+
+  setUsernameStatus(data ? "available" : "taken");
+}, 400);
+
+  return () => {
+    clearTimeout(timeout);
+    controller.abort();
+  };
+}, [username]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -60,11 +71,12 @@ export default function RegisterForm() {
       return;
     }
 
-    setLoading(true);
+    if (password !== confirmPassword) {
+      setError("Hesla se neshodují.");
+      return;
+    }
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    setLoading(true);
 
     const supabase = createClient();
 
@@ -72,7 +84,7 @@ export default function RegisterForm() {
     // před odesláním to ověříme ještě jednou pro jistotu (race condition).
     const { data: available, error: checkError } = await supabase.rpc(
       "is_username_available",
-      { desired_username: username }
+      { desired_username: username },
     );
 
     if (checkError) {
@@ -101,14 +113,24 @@ export default function RegisterForm() {
     setLoading(false);
 
     if (error) {
-      console.log("AUTH ERROR:", error.message, error.code, error.status, error);
+      console.log(
+        "AUTH ERROR:",
+        error.message,
+        error.code,
+        error.status,
+        error,
+      );
       // Sem už by se v běžném provozu skoro nikdy nemělo dostat kvůli username,
       // jen při race condition. Obecná hláška je v pořádku.
       setError("Něco se pokazilo, zkuste to znovu.");
       return;
     }
 
-    if (data.user && data.user.identities && data.user.identities.length === 0) {
+    if (
+      data.user &&
+      data.user.identities &&
+      data.user.identities.length === 0
+    ) {
       setError("Tento email už je zaregistrovaný.");
       return;
     }
@@ -118,7 +140,7 @@ export default function RegisterForm() {
 
   if (success) {
     return (
-<div className="relative flex flex-1 w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none ">
+      <div className="relative flex flex-1 w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none ">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-300/40 dark:bg-emerald-500/20 blur-3xl animate-blob" />
           <div className="absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full bg-sky-300/30 dark:bg-indigo-600/20 blur-3xl animate-blob animation-delay-2000" />
@@ -170,7 +192,7 @@ export default function RegisterForm() {
   }
 
   return (
-<div className="relative flex flex-1 w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
+    <div className="relative flex flex-1 w-full flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
       {/* dekorativní animované pozadí */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-300/40 dark:bg-emerald-500/20 blur-3xl animate-blob" />
@@ -237,8 +259,8 @@ export default function RegisterForm() {
                   autoComplete="username"
                   minLength={3}
                   maxLength={20}
-                  pattern="^[a-z0-9_]{3,20}$"
-                  title="Uživatelské jméno smí obsahovat pouze malá písmena, čísla a podtržítka. Délka 3–20 znaků."
+                  pattern="^(?!.*\.\.)[a-z0-9_][a-z0-9_.]{1,18}[a-z0-9_]$"
+                  title="Uživatelské jméno smí obsahovat malá písmena, čísla, podtržítka a tečky (ne dvě tečky za sebou, ne na začátku ani na konci). Délka 3–20 znaků."
                   aria-invalid={
                     usernameStatus === "taken" || usernameStatus === "invalid"
                   }
@@ -254,7 +276,8 @@ export default function RegisterForm() {
               {usernameStatus === "invalid" && (
                 <p className="mt-1.5 text-sm text-red-700 dark:text-red-400 flex flex-row gap-2 items-center">
                   <CircleAlert className="h-5 w-5" />
-                  Pouze malá písmena, čísla a podtržítka, 3–20 znaků.
+                  Pouze malá písmena, čísla, podtržítka a tečky (ne na začátku,
+                  na konci ani dvě za sebou), 3–20 znaků.
                 </p>
               )}
 
@@ -297,6 +320,8 @@ export default function RegisterForm() {
                   type="email"
                   placeholder="vas@email.cz"
                   name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
                   className="block w-full rounded-md border border-stone-300 bg-white px-3 py-1.5 text-base text-stone-900 placeholder:text-gray-500 outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-2 dark:focus:ring-emerald-500 sm:text-sm/6"
@@ -317,6 +342,8 @@ export default function RegisterForm() {
                   placeholder="*********"
                   type="password"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={8}
                   autoComplete="new-password"
@@ -326,9 +353,46 @@ export default function RegisterForm() {
             </div>
 
             <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm/6 font-bold dark:text-slate-300 text-stone-700"
+              >
+                Heslo znovu
+              </label>
+              <div className="mt-2">
+                <input
+                  id="confirmPassword"
+                  placeholder="*********"
+                  type="password"
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  aria-invalid={passwordsMismatch}
+                  className={
+                    "block w-full rounded-md border px-3 py-1.5 text-base placeholder:text-gray-500 outline-none sm:text-sm/6 " +
+                    (passwordsMismatch
+                      ? "border-red-500 bg-red-50 text-red-900 focus:border-red-500 focus:ring-2 focus:ring-red-500 dark:border-red-500 dark:bg-red-950/40 dark:text-red-100"
+                      : "border-stone-300 bg-white text-stone-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-2 dark:focus:ring-emerald-500")
+                  }
+                />
+              </div>
+              {passwordsMismatch && (
+                <p className="mt-1.5 text-sm text-red-700 dark:text-red-400 flex flex-row gap-2 items-center">
+                  <CircleAlert className="h-5 w-5" />
+                  Hesla se neshodují.
+                </p>
+              )}
+            </div>
+
+            <div>
               <button
                 type="submit"
-                disabled={loading || usernameStatus !== "available"}
+                disabled={
+                  loading || usernameStatus !== "available" || passwordsMismatch
+                }
                 className="flex w-full justify-center rounded-md bg-emerald-600 dark:hover:bg-emerald-500 hover:bg-emerald-700 transition-all duration-200 ease-in px-3 py-1.5 text-sm/6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? "Registruji…" : "Zaregistrovat se"}

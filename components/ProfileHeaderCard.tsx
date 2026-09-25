@@ -30,20 +30,6 @@ type ProfileHeaderCardProps = {
   isOwnProfile: boolean;
 };
 
-const monthNames = [
-  "ledna",
-  "února",
-  "března",
-  "dubna",
-  "května",
-  "června",
-  "července",
-  "srpna",
-  "září",
-  "října",
-  "listopadu",
-  "prosince",
-];
 
 export default function ProfileHeaderCard({
   profile,
@@ -91,7 +77,7 @@ const memberSince = created_at
             <Link
               href="/profile/edit"
               type="button"
-              className="flex items-center justify-center gap-1 sm:gap-2 text-white bg-emerald-800 hover:bg-emerald-700 border dark:border-slate-200 border-emerald-900  dark:bg-slate-800/60 dark:hover:bg-slate-600 dark:text-text-slate-200 font-bold py-2 sm:py-3 px-0 sm:px-3 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+              className="flex items-center justify-center px-2 gap-1 sm:gap-2 text-white bg-emerald-800 hover:bg-emerald-700 border dark:border-slate-200 border-emerald-900  dark:bg-slate-800/60 dark:hover:bg-slate-600 dark:text-text-slate-200 font-bold py-2 sm:py-3 sm:px-3 rounded-lg shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
             >
               <Pencil className="w-4 h-4 shrink-0" />
               <span className="truncate">Upravit profil</span>
@@ -102,7 +88,7 @@ const memberSince = created_at
 
       {/* Header content */}
       <div className="px-4 sm:px-5 md:px-8 pb-6">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 -mt-12">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 -mt-12">
           {/* Left: avatar + name */}
           <div className="flex flex-col md:flex-row md:items-end gap-4">
             <div className="relative shrink-0 mx-auto md:mx-0">
@@ -114,7 +100,7 @@ const memberSince = created_at
             </div>
 
             <div className="pb-2 text-center md:text-left">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              <div className="flex flex-row flex-wrap items-center justify-center md:justify-start gap-2">
                 <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
                   {display_name || username}
                 </h1>
@@ -124,12 +110,12 @@ const memberSince = created_at
                     Admin
                   </span>
                 )}
-                <span className="flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 text-xs font-medium px-2.5 py-1">
+                {/* <span className="flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400 text-xs font-medium px-2.5 py-1">
                   <BadgeCheck className="w-3.5 h-3.5" />
                   Top 1% mapovatelů
-                </span>
+                </span> */}
               </div>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1 text-sm">
+              <div className="flex flex-col md:flex-row flex-wrap items-center justify-center md:justify-start gap-2 mt-1 text-sm">
                 <span className="text-emerald-700 dark:text-emerald-400 font-bold fle">
                   @{username}
                 </span>
@@ -141,10 +127,10 @@ const memberSince = created_at
           </div>
 
           {/* Right: action buttons */}
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2 shrink-0 w-full md:w-auto">
+         <div className="flex flex-wrap items-center justify-center md:justify-start lg:justify-end gap-2 w-full lg:w-auto lg:shrink-0">
             <button
               type="button"
-              className="flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors flex-1 md:flex-none min-w-0"
+              className="flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors flex-1 sm:flex-none min-w-0"
             >
               <MessageSquare className="w-4 h-4 shrink-0" />
               <span className="truncate">Konzultovat určení</span>
@@ -157,7 +143,7 @@ const memberSince = created_at
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors flex-1 md:flex-none min-w-0"
+              className="flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800 transition-colors flex-1 sm:flex-none min-w-0"
             >
               <Download className="w-4 h-4 shrink-0" />
               <span className="truncate">Export nálezů</span>
@@ -174,7 +160,7 @@ const memberSince = created_at
         )}
 
         {/* Achievement badges */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4">
+        {/* <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4">
           <span className="flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300">
             <Award className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             Zlatý determinátor (Top 1%)
@@ -191,7 +177,7 @@ const memberSince = created_at
             <Landmark className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             Certifikovaný taxonom AOPK ČR
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );
