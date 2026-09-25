@@ -25,35 +25,42 @@ export default function RegisterForm() {
   const passwordsMismatch =
     confirmPassword.length > 0 && password !== confirmPassword;
 
-  useEffect(() => {
-    if (username.length === 0) {
-      setUsernameStatus("idle");
-      return;
-    }
+useEffect(() => {
+  if (username.length === 0) {
+    setUsernameStatus("idle");
+    return;
+  }
 
-    if (!USERNAME_REGEX.test(username)) {
-      setUsernameStatus("invalid");
-      return;
-    }
+  if (!USERNAME_REGEX.test(username)) {
+    setUsernameStatus("invalid");
+    return;
+  }
 
-    setUsernameStatus("checking");
+  setUsernameStatus("checking");
 
-    const timeout = setTimeout(async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.rpc("is_username_available", {
-        desired_username: username,
-      });
+  const controller = new AbortController();
 
-      if (error) {
-        setUsernameStatus("error");
-        return;
-      }
+const timeout = setTimeout(async () => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .rpc("is_username_available", { desired_username: username })
+    .abortSignal(controller.signal);
 
-      setUsernameStatus(data ? "available" : "taken");
-    }, 400);
+  if (controller.signal.aborted) return;
 
-    return () => clearTimeout(timeout);
-  }, [username]);
+  if (error) {
+    setUsernameStatus("error");
+    return;
+  }
+
+  setUsernameStatus(data ? "available" : "taken");
+}, 400);
+
+  return () => {
+    clearTimeout(timeout);
+    controller.abort();
+  };
+}, [username]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
