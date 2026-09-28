@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { movePhoto, reorderPhoto } from "@/lib/photo-order";
 import usePhotoDrag from "./usePhotoDrag";
 import PhotoOrderBadge from "./PhotoOrderBadge";
-import PhotoViewer, { galleryPhotoUrl } from "./PhotoViewer";
+import PhotoViewer from "./PhotoViewer";
+import { SightingPhoto } from "./SightingPhoto";
 import PhotoOrderButtons from "./PhotoOrderButtons";
 
 export default function SightingGallery({ id, paths, editable }: { id: string; paths: string[]; editable: boolean }) {
@@ -38,7 +39,7 @@ export default function SightingGallery({ id, paths, editable }: { id: string; p
       {editable && <p className="text-xs text-[var(--foreground-muted)]">Přetáhni fotku na nové místo. Pak ulož pořadí.</p>}
       <ol className="flex gap-2 overflow-x-auto py-2">
         {order.map((path, index) => <li key={path} {...photoDrag.itemProps(index)} className={`w-28 shrink-0 space-y-2 ${photoDrag.itemClass(index)}`}>
-          <button type="button" onClick={() => setSelected(path)} aria-pressed={selected === path} aria-label={`Zobrazit fotografii ${index + 1}`} className={`relative block w-full overflow-hidden rounded-xl border-2 ${selected === path ? "border-[var(--accent)]" : "border-transparent"}`}><PhotoOrderBadge index={index} draggable={editable && !busy} /><img draggable={false} src={galleryPhotoUrl(id, path, 320)} alt={`Náhled ${index + 1}`} loading="lazy" className="aspect-[4/3] w-full object-cover" /></button>
+          <button type="button" onClick={() => setSelected(path)} aria-pressed={selected === path} aria-label={`Zobrazit fotografii ${index + 1}`} className={`relative block w-full overflow-hidden rounded-xl border-2 ${selected === path ? "border-[var(--accent)]" : "border-transparent"}`}><PhotoOrderBadge index={index} draggable={editable && !busy} /><SightingPhoto path={path} width={320} draggable={false} alt={`Náhled ${index + 1}`} loading="lazy" className="aspect-[4/3] w-full object-cover" /></button>
           {editable && <PhotoOrderButtons index={index} count={order.length} disabled={busy} onMove={direction => { setOrder(current => movePhoto(current, index, direction)); setMessage(""); }} />}
         </li>)}
       </ol>

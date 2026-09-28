@@ -12,6 +12,7 @@ import "leaflet/dist/leaflet.css";
 import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
 import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 import "./map.css";
+import { SightingPhoto } from "@/components/sightings/SightingPhoto";
 export type Bounds = { south: number; north: number; west: number; east: number };
 const icon = (color: string, symbol: string) => divIcon({ className: "bugmap-marker", html: `<span style="background:${color}"><b>${symbol}</b></span>`, iconSize: [36, 44], iconAnchor: [18, 40], popupAnchor: [0, -40] });
 const neutral = icon("#64748b", "?"); const confirmed = icon("#047857", "✓"); const draft = icon("#c2410c", "+");
@@ -96,7 +97,7 @@ const SightingMarkers = memo(function SightingMarkers({ sightings, mapHref }: { 
   return (
     <MarkerClusterGroup chunkedLoading chunkInterval={16} chunkDelay={16} animate={false} showCoverageOnHover={false} removeOutsideVisibleBounds>
       {sightings.filter(s => s.id && s.latitude != null && s.longitude != null && s.geoprivacy !== "private").map(s => <Marker key={s.id} position={[s.latitude!, s.longitude!]} opacity={s.geoprivacy === "open" ? 1 : 0.6} icon={s.id_status === "confirmed" ? confirmed : neutral}>
-        <Popup><div className="w-52 space-y-2">{s.photo_url && <img src={`/sightings/${s.id}/photo?w=320`} alt="Fotografie nálezu" loading="eager" decoding="async" className="h-28 w-full rounded-lg object-cover" />}<strong>{sightingName(s)}</strong><p>{statusLabel(s.id_status)}</p><p>{locationLabel(s)}</p>{s.location_precision === "exact" && s.geoprivacy !== "open" && <p>Skutečná poloha, viditelná jen tobě (autor/admin).</p>}<Link href={`/sightings/${s.id}?from=${encodeURIComponent(mapHref)}`}>Detail a určení →</Link></div></Popup>
+        <Popup><div className="w-52 space-y-2">{s.photo_url && <SightingPhoto path={s.photo_url} width={320} alt="Fotografie nálezu" loading="eager" decoding="async" className="h-28 w-full rounded-lg object-cover" />}<strong>{sightingName(s)}</strong><p>{statusLabel(s.id_status)}</p><p>{locationLabel(s)}</p>{s.location_precision === "exact" && s.geoprivacy !== "open" && <p>Skutečná poloha, viditelná jen tobě (autor/admin).</p>}<Link href={`/sightings/${s.id}?from=${encodeURIComponent(mapHref)}`}>Detail a určení →</Link></div></Popup>
       </Marker>)}
     </MarkerClusterGroup>
   );

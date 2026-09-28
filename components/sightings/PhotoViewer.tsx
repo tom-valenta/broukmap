@@ -3,10 +3,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
-
-export function galleryPhotoUrl(id: string, path: string, width = 960) {
-  return `/sightings/${id}/photo?photo=${encodeURIComponent(path)}&w=${width}`;
-}
+import { signedSightingPhotoUrl, useSightingPhotoUrl } from "./SightingPhoto";
 
 export default function PhotoViewer({ id, paths, selected, onSelect }: {
   id: string; paths: string[]; selected: string; onSelect: (path: string) => void;
@@ -15,12 +12,13 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const opener = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
   const index = Math.max(0, paths.indexOf(selected));
-  const src = galleryPhotoUrl(id, selected);
+  const src = useSightingPhotoUrl(selected, 960);
   const [loaded, setLoaded] = useState("");
   const [decoded, setDecoded] = useState<Set<string>>(() => new Set());
   const [failed, setFailed] = useState("");
   const step = (direction: number) => onSelect(paths[(index + direction + paths.length) % paths.length]);
   useEffect(() => {
+    if (!src) return;
     if (paths.length < 2 || loaded !== src) return;
     // Do not compete with the LCP image by downloading the whole gallery.
     // One small adjacent preview keeps the next navigation responsive.
@@ -29,7 +27,8 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     async function warm() {
       while (!cancelled && queue.length) {
         const path = queue.shift()!;
-        const url = galleryPhotoUrl(id, path, 320);
+        const url = await signedSightingPhotoUrl(path, 320);
+        if (!url) continue;
         const image = new Image(); image.fetchPriority = "low"; image.src = url;
         try {
           await image.decode();
@@ -64,9 +63,9 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   function picture(fullscreen: boolean) {
     return <>
       <div className={`relative ${fullscreen ? "h-full w-full" : "h-[min(60vh,38rem)] min-h-64 w-full"}`}>
-        <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />
+        {src && <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />}
       </div>
-      {loaded !== src && !decoded.has(src) && failed !== src && <span role="status" className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-lg bg-black/65 px-3 py-1 text-sm text-white">Načítám…</span>}
+      {(!src || (loaded !== src && !decoded.has(src) && failed !== src)) && <span role="status" className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-lg bg-black/65 px-3 py-1 text-sm text-white">Načítám…</span>}
       {failed === src && <span role="alert" className="absolute inset-x-14 top-1/2 rounded-lg bg-black/75 p-3 text-center text-sm text-white">Fotografii se nepodařilo načíst. Zkus jiný snímek nebo obnov stránku.</span>}
     </>;
   }
@@ -77,7 +76,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     </div>
     {expanded && <dialog ref={dialog} onCancel={event => { event.preventDefault(); close(); }} onClose={() => { setExpanded(false); opener.current?.focus(); }} onKeyDown={keyboard} onClick={event => { if (event.target === event.currentTarget) close(); }} aria-label="Fotogalerie nálezu" className="fixed inset-0 m-auto h-dvh max-h-none w-screen max-w-none isolate overflow-hidden bg-slate-800 p-3 text-white backdrop:bg-slate-900/70 backdrop:backdrop-blur-md sm:p-8">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <img src={galleryPhotoUrl(id, selected, 320)} alt="" decoding="async" className="h-full w-full scale-125 object-cover opacity-50 blur-3xl saturate-75" />
+        {src && <img src={src} alt="" decoding="async" className="h-full w-full scale-125 object-cover opacity-50 blur-3xl saturate-75" />}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-slate-900/25 to-slate-950/65" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(15,23,42,0.45)_100%)]" />
       </div>
