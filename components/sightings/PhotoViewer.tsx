@@ -11,6 +11,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
   const index = Math.max(0, paths.indexOf(selected));
   // A detail needs more pixels than a map card; the dialog gets a near-native
   // rendition so 4K uploads stay sharp on desktop displays.
@@ -19,6 +20,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const [decoded, setDecoded] = useState<Set<string>>(() => new Set());
   const [failed, setFailed] = useState("");
   const step = (direction: number) => onSelect(paths[(index + direction + paths.length) % paths.length]);
+  useEffect(() => { setZoomed(false); }, [selected]);
   useEffect(() => {
     if (!src) return;
     if (paths.length < 2 || loaded !== src) return;
@@ -48,7 +50,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = previous; };
   }, [expanded]);
-  function close() { dialog.current?.close(); setExpanded(false); opener.current?.focus(); }
+  function close() { dialog.current?.close(); setExpanded(false); setZoomed(false); opener.current?.focus(); }
   function keyboard(event: KeyboardEvent<HTMLElement>) {
     if (event.altKey || event.ctrlKey || event.metaKey || paths.length < 2) return;
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -63,9 +65,10 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     <span aria-live="polite" className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold tabular-nums text-white">{index + 1} / {paths.length}</span>
   </>;
   function picture(fullscreen: boolean) {
+    const image = src && <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain transition-transform duration-200 ${fullscreen && zoomed ? "scale-[2]" : "scale-100"} ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />;
     return <>
-      <div className={`relative ${fullscreen ? "h-full w-full" : "h-[min(60vh,38rem)] min-h-64 w-full"}`}>
-        {src && <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />}
+      <div className={`relative ${fullscreen ? "h-full w-full overflow-hidden" : "h-[min(60vh,38rem)] min-h-64 w-full"}`}>
+        {fullscreen ? <button type="button" onClick={() => setZoomed(current => !current)} aria-label={zoomed ? "Oddálit fotografii" : "Přiblížit fotografii"} className={`block h-full w-full ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}>{image}</button> : image}
       </div>
       {(!src || (loaded !== src && !decoded.has(src) && failed !== src)) && <span role="status" className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-lg bg-black/65 px-3 py-1 text-sm text-white">Načítám…</span>}
       {failed === src && <span role="alert" className="absolute inset-x-14 top-1/2 rounded-lg bg-black/75 p-3 text-center text-sm text-white">Fotografii se nepodařilo načíst. Zkus jiný snímek nebo obnov stránku.</span>}
