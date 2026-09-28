@@ -14,7 +14,8 @@ export function signedSightingPhotoUrl(value: string | null, width: number) {
   const key = `${path}:${width}`;
   const cached = urlCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.request;
-  const request = createClient().storage.from("sighting-photos").createSignedUrl(path, 90, { transform: { width, quality: 75 } })
+  // Storage defaults to `cover`, which crops when only the width is set.
+  const request = createClient().storage.from("sighting-photos").createSignedUrl(path, 90, { transform: { width, quality: 75, resize: "contain" } })
     .then(({ data, error }) => error ? null : data.signedUrl)
     .catch(() => null);
   urlCache.set(key, { expiresAt: Date.now() + TTL_MS, request });

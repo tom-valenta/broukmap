@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const width = query.get("w");
   const size = width === "320" ? 320 : width === "640" ? 640 : width === "960" ? 960 : width === "1280" ? 1280 : undefined;
   const { data, error } = await supabase.storage.from("sighting-photos").createSignedUrl(path, SIGNED_URL_TTL_SECONDS, {
-    transform: size ? { width: size, quality: 75 } : undefined,
+    transform: size ? { width: size, quality: 75, resize: "contain" } : undefined,
   });
   if (error || !data?.signedUrl) return fail(503);
   return new Response(null, {
