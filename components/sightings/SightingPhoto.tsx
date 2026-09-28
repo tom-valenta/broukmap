@@ -8,30 +8,30 @@ import { sightingPhotoPath } from "@/lib/sighting-photo";
 const TTL_MS = 75_000;
 const urlCache = new Map<string, { expiresAt: number; request: Promise<string | null> }>();
 
-export function signedSightingPhotoUrl(value: string | null, width: number) {
+export function signedSightingPhotoUrl(value: string | null, width: number, quality = 75) {
   const path = sightingPhotoPath(value);
   if (!path) return Promise.resolve(null);
-  const key = `${path}:${width}`;
+  const key = `${path}:${width}:${quality}`;
   const cached = urlCache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.request;
   // Storage defaults to `cover`, which crops when only the width is set.
-  const request = createClient().storage.from("sighting-photos").createSignedUrl(path, 90, { transform: { width, quality: 75, resize: "contain" } })
+  const request = createClient().storage.from("sighting-photos").createSignedUrl(path, 90, { transform: { width, quality, resize: "contain" } })
     .then(({ data, error }) => error ? null : data.signedUrl)
     .catch(() => null);
   urlCache.set(key, { expiresAt: Date.now() + TTL_MS, request });
   return request;
 }
 
-export function useSightingPhotoUrl(value: string | null, width: number) {
+export function useSightingPhotoUrl(value: string | null, width: number, quality = 75) {
   const path = sightingPhotoPath(value);
   const [url, setUrl] = useState<string | null>(null);
   useEffect(() => {
     let active = true;
     setUrl(null);
     if (!path) return;
-    void signedSightingPhotoUrl(path, width).then(result => { if (active) setUrl(result); });
+    void signedSightingPhotoUrl(path, width, quality).then(result => { if (active) setUrl(result); });
     return () => { active = false; };
-  }, [path, width]);
+  }, [path, width, quality]);
   return url;
 }
 

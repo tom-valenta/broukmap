@@ -12,7 +12,9 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const opener = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
   const index = Math.max(0, paths.indexOf(selected));
-  const src = useSightingPhotoUrl(selected, 960);
+  // A detail needs more pixels than a map card; the dialog gets a near-native
+  // rendition so 4K uploads stay sharp on desktop displays.
+  const src = useSightingPhotoUrl(selected, expanded ? 2048 : 1280, 90);
   const [loaded, setLoaded] = useState("");
   const [decoded, setDecoded] = useState<Set<string>>(() => new Set());
   const [failed, setFailed] = useState("");
