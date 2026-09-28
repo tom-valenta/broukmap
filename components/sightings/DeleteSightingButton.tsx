@@ -1,0 +1,13 @@
+"use client";
+import { useState, useTransition } from "react";
+import { Trash2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { deleteOwnSighting } from "@/app/sightings/actions";
+
+export default function DeleteSightingButton({ sightingId }: { sightingId: string }) {
+  const [open, setOpen] = useState(false); const [error, setError] = useState(""); const [pending, startTransition] = useTransition(); const router = useRouter();
+  function remove() { setError(""); startTransition(async () => { const { error } = await deleteOwnSighting(sightingId); if (error) { setError(error); return; } router.push("/map"); router.refresh(); }); }
+  return <><button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--danger)_45%,var(--border))] px-4 text-sm font-semibold text-[var(--danger)] transition hover:bg-[color-mix(in_srgb,var(--danger)_10%,transparent)]"><Trash2 className="size-4" />Smazat nález</button>
+    {open && <div className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget && !pending) setOpen(false); }}><section role="dialog" aria-modal="true" aria-labelledby="delete-title" className="w-full max-w-md rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-2xl"><div className="flex items-start justify-between gap-4"><div><span className="grid size-10 place-items-center rounded-full bg-[color-mix(in_srgb,var(--danger)_15%,transparent)] text-[var(--danger)]"><Trash2 className="size-5" /></span><h2 id="delete-title" className="mt-4 text-xl font-bold">Smazat tento nález?</h2><p className="mt-2 text-sm leading-6 text-[var(--foreground-muted)]">Smaže se fotografie, poznámka, určení, lajky i nahlášení. Tato akce nejde vrátit.</p></div><button type="button" onClick={() => setOpen(false)} disabled={pending} aria-label="Zavřít" className="grid size-10 place-items-center rounded-full hover:bg-[var(--surface-hover)]"><X className="size-5" /></button></div>{error && <p role="alert" className="mt-4 rounded-xl bg-[color-mix(in_srgb,var(--danger)_12%,transparent)] p-3 text-sm text-[var(--danger)]">{error}</p>}<div className="mt-6 flex justify-end gap-3"><button type="button" onClick={() => setOpen(false)} disabled={pending} className="min-h-11 rounded-xl px-4 text-sm font-semibold hover:bg-[var(--surface-hover)]">Zrušit</button><button type="button" onClick={remove} disabled={pending} className="min-h-11 rounded-xl bg-[var(--danger)] px-4 text-sm font-semibold text-white disabled:opacity-50">{pending ? "Mažu…" : "Ano, smazat"}</button></div></section></div>}
+  </>;
+}
