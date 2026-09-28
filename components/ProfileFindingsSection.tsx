@@ -1,93 +1,15 @@
-// components/ProfileFindingsSection.tsx
 "use client";
-
 import { useState } from "react";
 import FilterBar from "@/components/FilterBar";
-import FindingsFilterRow, { type FindingsView } from "@/components/ProfileFindingBar";
-import { ProfileFindingCard, type ProfileFindingCardProps } from "@/components/ProfileFindingCard";
-
-const findings: ProfileFindingCardProps[] = [
-  { imageUrl: "/idk.jpg" },
-  { imageUrl: "/bug2.jpg" },
-  { imageUrl: "/bug.jpg" },
-  { imageUrl: "/idk.jpg" },
-].map((img) => ({
-  ...img,
-  imageAlt: "Roháč obecný (Lucanus cervus)",
-  name: "Roháč obecný",
-  latinName: "Lucanus cervus (Linnaeus, 1758)",
-  family: "LUCANIDAE",
-  findingNumber: 284,
-  gps: "50.038° N, 13.882° E",
-  note: "Samčí exemplář (délka těla 74 mm vč. kusadel) nalezen na osluněném kmeni přestárlého dubu zimního v pozdním odpoledni.",
-  location: "CHKO Křivoklátsko",
-  dateFound: "14. července 2024",
-  authorName: "RNDr. Tereza Nováková",
-  authorInitials: "TN",
-  conservationStatus: "CR" as const,
-  conservationLabel: "Kriticky ohrožený",
-}));
-
-// grid/list/columns → počet sloupců layoutu
-const VIEW_GRID_CLASSES: Record<FindingsView, string> = {
-  grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-  list: "grid-cols-1",
-  columns: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-};
-
-export default function ProfileFindingsSection() {
+import { ProfileFindingCard } from "@/components/ProfileFindingCard";
+import type { Sighting } from "@/lib/sightings";
+export default function ProfileFindingsSection({ sightings, badges, authorName }: { sightings: Sighting[]; badges: { id: string; label: string }[]; authorName: string }) {
   const [activeTab, setActiveTab] = useState("nalezy");
-  const [view, setView] = useState<FindingsView>("grid");
-
-  return (
-    <>
-      <section className="py-4 md:py-5 px-5 md:px-10 lg:px-16 bg-stone-100 dark:bg-slate-900 border-stone-300 dark:border-slate-800">
-        <div className="w-full flex flex-col md:flex-row max-w-7xl mx-auto justify-between gap-3">
-          <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
-        </div>
-      </section>
-
-      {activeTab === "nalezy" && (
-        <section className="py-4 md:py-12 px-5 md:px-10 lg:px-16 bg-stone-100 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto flex flex-col gap-6">
-            <FindingsFilterRow
-              view={view}
-              onViewChange={setView}
-              shown={findings.length}
-              total={284}
-            />
-            <div className={`grid ${VIEW_GRID_CLASSES[view]} gap-4 sm:gap-6 2xl:gap-8`}>
-              {findings.map((f, i) => (
-                <ProfileFindingCard key={i} {...f} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {activeTab === "determinace" && (
-        <section className="py-4 md:py-12 px-5 md:px-10 lg:px-16 bg-stone-100 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto">
-            {/* determinace grid/list, až budeš mít data a kartu pro ně */}
-          </div>
-        </section>
-      )}
-
-      {activeTab === "lokality" && (
-        <section className="py-4 md:py-12 px-5 md:px-10 lg:px-16 bg-stone-100 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto">
-            {/* uložené lokality */}
-          </div>
-        </section>
-      )}
-
-      {activeTab === "odznaky" && (
-        <section className="py-4 md:py-12 px-5 md:px-10 lg:px-16 bg-stone-100 dark:bg-slate-950">
-          <div className="max-w-7xl mx-auto text-sm text-stone-500 dark:text-slate-400">
-            Zatím žádné odznaky k zobrazení.
-          </div>
-        </section>
-      )}
-    </>
-  );
+  return <section className="bg-stone-100 px-5 py-8 text-stone-900 dark:bg-slate-950 dark:text-slate-100"><div className="mx-auto max-w-7xl space-y-6">
+    <FilterBar activeTab={activeTab} onTabChange={setActiveTab} />
+    {activeTab === "nalezy" && (sightings.length ? <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{sightings.map(s => <ProfileFindingCard key={s.id} sighting={s} authorName={authorName} />)}</div> : <p>Zatím žádné dostupné nálezy.</p>)}
+    {activeTab === "odznaky" && (badges.length ? <ul className="flex flex-wrap gap-3">{badges.map(b => <li key={b.id} className="rounded-full border border-emerald-300 px-4 py-2">{b.label}</li>)}</ul> : <p>Zatím žádné odznaky.</p>)}
+    {activeTab === "nalezy" && sightings.length > 0 && <p className="text-xs text-stone-500 dark:text-slate-400">Lokality: © <a className="underline" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>. U rozmazaných nálezů je obec přibližná.</p>}
+    {activeTab !== "nalezy" && activeTab !== "odznaky" && <p>Tato část profilu zatím není dostupná.</p>}
+  </div></section>;
 }

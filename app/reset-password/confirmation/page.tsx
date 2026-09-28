@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function PasswordResetConfirmation() {
   return (
     <div className="relative flex flex-1 flex-col justify-center overflow-hidden px-6 py-12 lg:px-8 dark:text-white bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none">
@@ -12,7 +14,7 @@ export default function PasswordResetConfirmation() {
 
       <div className="relative bg-white dark:bg-slate-900 mx-auto w-full max-w-md rounded-2xl border dark:border-slate-800 border-stone-200 shadow-xl ring-gray-900/5 p-6 text-center dark:text-slate-300 text-stone-700"> <h1 className="text-2xl font-bold">Heslo úspěšně resetováno</h1> 
       <p className="text-center text-gray-600 dark:text-gray-400">
-        Vaše heslo bylo úspěšně resetováno. <a href="/" className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">Klikněte zde</a> pro návrat na domovskou stránku.
+        Vaše heslo bylo úspěšně resetováno. <Link href="/" className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300">Klikněte zde</Link> pro návrat na domovskou stránku.
       </p>
       </div>
     </div>

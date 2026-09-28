@@ -5,7 +5,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/nav";
 import Footer from "@/components/layout/Footer";
+import SiteChrome from "@/components/layout/SiteChrome";
 import { ThemeProvider } from "@/components/theme-provider";
+import type { MetadataRoute } from "next";
+
+
+
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,9 +64,9 @@ export default async function RootLayout({
       <body className="min-h-dvh flex flex-col bg-white dark:bg-slate-950">
         <AuthProvider initialUser={user} initialProfile={profile}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Navbar />
+            <SiteChrome><Navbar /></SiteChrome>
             <main className="flex flex-1 flex-col">{children}</main>
-            <Footer />
+            <SiteChrome><Footer /></SiteChrome>
           </ThemeProvider>
         </AuthProvider>
       </body>

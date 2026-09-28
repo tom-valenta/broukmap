@@ -1,7 +1,12 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 
 export async function proxy(request: NextRequest) {
+  // Photo handlers authorize through database RLS themselves. Page navigation
+  // still refreshes sessions and enforces profile completion as usual.
+  if (/^\/sightings\/[^/]+\/photo\/?$/.test(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   return await updateSession(request)
 }
 

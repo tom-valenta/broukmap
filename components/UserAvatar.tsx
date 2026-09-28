@@ -14,6 +14,7 @@ type UserAvatarProps = {
   profile?: ProfileLike | null;
   size: number; // px, pro kvalitu obrázku
   className?: string; // rozměry, zaoblení, border
+  eager?: boolean;
 };
 
 export default function UserAvatar({

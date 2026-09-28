@@ -1,4 +1,5 @@
 // app/not-found.tsx
+import Link from "next/link";
 export default function NotFound() {
   return (
 <section className="flex w-full flex-1 flex-col items-center justify-center overflow-hidden bg-linear-to-b from-[#f6f7f1] via-emerald-100 to-stone-50 dark:bg-slate-950 dark:bg-none dark:text-white">
@@ -7,11 +8,11 @@ export default function NotFound() {
         Tahle stránka neexistuje.
       </p>
       
-     <a   href="/"
+     <Link href="/"
         className="mt-6 rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
       >
         Zpět na hlavní stránku
-      </a>
+      </Link>
     </section>
   );
 }

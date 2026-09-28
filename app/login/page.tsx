@@ -35,8 +35,9 @@ export default function LoginForm() {
       return;
     }
 
+    // Navigace už načte serverové komponenty s nově uloženou session.
+    // Další refresh by stejná data načetl podruhé a prodlužoval přihlášení.
     router.push("/");
-    router.refresh();
   }
 
   return (

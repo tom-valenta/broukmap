@@ -1,25 +1,38 @@
 import imageCompression from "browser-image-compression";
 
+const MAX_INPUT_MB = 30;
 const MAX_SIZE_MB = 5;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export class AvatarFileError extends Error {}
 
 export async function prepareAvatarFile(file: File): Promise<File> {
+  if (file.size > MAX_INPUT_MB * 1024 * 1024) {
+    throw new AvatarFileError(
+      `Soubor je příliš velký (max. ${MAX_INPUT_MB} MB).`
+    );
+  }
+
   let working = file;
 
   const isHeic =
     working.type === "image/heic" ||
     working.type === "image/heif" ||
-    /\.heic$/i.test(working.name);
+    /\.(heic|heif)$/i.test(working.name);
 
   if (isHeic) {
-    const heic2any = (await import("heic2any")).default;
-    const blob = await heic2any({
-      blob: working,
-      toType: "image/jpeg",
-      quality: 0.9,
-    });
+    let blob;
+    try {
+      const heic2any = (await import("heic2any")).default;
+      blob = await heic2any({
+        blob: working,
+        toType: "image/jpeg",
+        quality: 0.9,
+      });
+    } catch {
+      throw new AvatarFileError("Fotku ve formátu HEIC se nepodařilo převést.");
+    }
+
     const converted = Array.isArray(blob) ? blob[0] : blob;
     working = new File(
       [converted],
