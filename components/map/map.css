@@ -1,0 +1,13 @@
+.bugmap-map { height: 100%; width: 100%; z-index: 0; background: #e0ece8; }
+.bugmap-map.leaflet-grab { cursor: default; }
+.leaflet-dragging .bugmap-map.leaflet-grab,
+.leaflet-dragging .bugmap-map.leaflet-grab .leaflet-interactive { cursor: crosshair; }
+.bugmap-map .leaflet-top { top: calc(76px + env(safe-area-inset-top, 0px)); }
+.bugmap-map .leaflet-bottom { bottom: env(safe-area-inset-bottom, 0px); }
+.bugmap-marker { background: transparent; border: 0; }
+.bugmap-marker span { display: grid; place-items: center; width: 34px; height: 34px; border: 3px solid white; border-radius: 50% 50% 50% 3px; transform: rotate(-45deg); box-shadow: 0 3px 10px #0005; color: white; font: bold 19px system-ui; }
+.bugmap-marker b { transform: rotate(45deg); }
+.bugmap-map .leaflet-control-zoom a { width: 42px; height: 42px; line-height: 42px; }
+.bugmap-map .leaflet-popup-content { margin: 14px; }
+
+.bugmap-map .leaflet-bottom.leaflet-right .leaflet-control-zoom { margin-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }

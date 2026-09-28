@@ -1,0 +1,10 @@
+# Sensitive location protection
+
+- Ordinary obscured: 100 m. Sensitive (catalogue species, any canonical identification suggestion, or author checkbox): 3,000 m.
+- `SENSITIVE_OBFUSCATION_RADIUS_M` is the database constant in `private.protect_sighting_location`, introduced in `20260927101419_sensitive_obfuscation_radius.sql`. Change through a new migration, then update sightings to recompute where the radius increases. UI reads stored `obfuscation_radius_m`, not a duplicate constant.
+- Single stable point: great-circle destination with a random bearing and `sqrt(random()) * radius`. No area layers; clustering unchanged. Radius is a maximum offset, not a minimum distance.
+- Sensitive suggestions escalate immediately, consensus/admin pairing also checks sensitivity, catalogue changes protect both guesses and resolved species. Existing data is backfilled. Private remains private. Exact coordinates and RLS remain unchanged; open ordinary sightings retain the existing public exact-location semantics.
+- Protection never automatically shrinks after a guess is removed or sensitivity is unset. Repeated edits do not regenerate points. This avoids exposing multiple samples that can be averaged. The stored radius records the applied protection, even if a later guess is not sensitive.
+- Public view/feed expose the radius, not extra true coordinates. Owner/admin still receive exact coordinates; popup/detail label that distinction. Moderator sees obscured coordinates only. Public pins have reduced opacity.
+- The locality endpoint already reads anonymously, so changed public coordinates produce a new geocoding cache key. Previously returned coordinates cannot be retracted from somebody who already recorded them.
+- Verification: existing consensus SQL suite and `supabase/tests/sensitive_geoprivacy.sql`, both run with rollback fixtures. TypeScript and changed-file lint. Advisor warnings remain the pre-existing profile function/search-path, citext placement, role helpers and password protection findings.
