@@ -7,6 +7,7 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
   type ReactNode,
 } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -46,6 +47,7 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(initialUser);
   const [profile, setProfile] = useState<Profile | null>(initialProfile);
   const [loading, setLoading] = useState(false);
+  const currentUserId = useRef(initialUser?.id ?? null);
 
   const fetchProfile = useCallback(async (userId: string) => {
     const supabase = createClient();
@@ -54,7 +56,7 @@ export function AuthProvider({
       .select("id, username, display_name, avatar_url, has_set_username, role")
       .eq("id", userId)
       .single();
-    setProfile(data ?? null);
+    if (currentUserId.current === userId) setProfile(data ?? null);
   }, []);
 
   // Slouží k ručnímu obnovení profilu po mutaci (např. po completeProfile)
@@ -69,19 +71,26 @@ export function AuthProvider({
   useEffect(() => {
     const supabase = createClient();
 
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (event, session) => {
+        // The callback runs inside Supabase's auth lock. Awaiting a database
+        // request here can deadlock every map query waiting for the same session.
+        const userId = session?.user.id ?? null;
+        const changedUser = currentUserId.current !== userId;
+        currentUserId.current = userId;
         setUser(session?.user ?? null);
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
+        if (changedUser || !userId) setProfile(null);
+        if (!userId && timer) clearTimeout(timer);
+        if (userId && (changedUser || event === "USER_UPDATED" || (event === "INITIAL_SESSION" && !initialProfile))) {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => { void fetchProfile(userId); }, 0);
         }
       }
     );
+    return () => { if (timer) clearTimeout(timer); listener.subscription.unsubscribe(); };
 
-    return () => listener.subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, [fetchProfile, initialProfile]);
 
 const isAdmin = useMemo(() => profile?.role === "admin", [profile]);
 const isModeratorOrAdmin = useMemo(

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import ProfileFindingsSection from "@/components/ProfileFindingsSection";
@@ -5,162 +6,36 @@ import HeroCard from "@/components/HeroCard";
 import { getCurrentUserId, getUserByUsername } from "@/lib/user";
 import ProfileHeaderCard from "@/components/ProfileHeaderCard";
 import UserSearchBar from "../ProfileSearchBar";
-import {
-  AlertTriangleIcon,
-  BadgeCheck,
-  Bug,
-  Camera,
-  CheckCircleIcon,
-  HandHelping,
-  MapIcon,
-  RefreshCwIcon,
-  UsersIcon,
-} from "lucide-react";
-
-/* ---------- shared class strings (same palette as the homepage) ---------- */
-
-const pageBtnBase =
-  "flex items-center justify-center w-9 h-9 rounded-lg text-sm font-medium transition-colors";
-
-const pageBtnIdle = `${pageBtnBase} text-stone-700 hover:bg-stone-200 dark:text-slate-200 dark:hover:bg-slate-800`;
-
-export default async function ProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>;
-}) {
-  const { username } = await params;
-  const decodedUsername = decodeURIComponent(username);
-  const lowerUsername = decodedUsername.toLocaleLowerCase();
-
-  if (decodedUsername !== lowerUsername) {
-    redirect(`/profile/${lowerUsername}`);
-  }
-
-  const profileUser = await getUserByUsername(decodeURIComponent(username));
-  if (!profileUser) notFound();
-
-  const currentUserId = await getCurrentUserId();
-  const isOwnProfile = currentUserId === profileUser.id;
-
-  return (
-    <>
-      {/* Hlavička profilu + statistiky */}
-      <section className="px-5 md:px-10 lg:px-16 py-12 lg:py-24 bg-linear-to-b from-[#f6f7f1] via-emerald-50 to-stone-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-        <div className="max-w-7xl mx-auto">
-          <UserSearchBar />
-
-          <ProfileHeaderCard
-            profile={profileUser}
-            isOwnProfile={isOwnProfile}
-          />
-
-          <div className="py-8 md:py-16">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 items-stretch">
-              <HeroCard
-                icon={Camera}
-                iconColor="dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800 bg-emerald-100 text-stone-800 border-emerald-300"
-                number="5"
-                title="Nahraných nálezů"
-                description=""
-              />
-              <HeroCard
-                icon={Bug}
-                iconColor="dark:bg-lime-950/50 dark:text-lime-400 dark:border-lime-300/30 bg-lime-100 text-stone-800 border-lime-300"
-                number="10"
-                title="Zdokumentovaných druhů"
-                description=""
-              />
-              <HeroCard
-                icon={HandHelping}
-                iconColor="dark:bg-teal-950/50 dark:text-teal-400 dark:border-teal-800 bg-teal-100 text-stone-800 border-teal-300"
-                number="120"
-                title="Navržených určení"
-                description="pro 100 pozorovatelů"
-              />
-              <HeroCard
-                icon={BadgeCheck}
-                iconColor="dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-300/30 bg-amber-100 text-stone-800 border-amber-300"
-                number="34"
-                title="Potvrzených určení"
-               
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Záložky + nálezy (tabs + filter + grid, all tab-driven) */}
-      <ProfileFindingsSection />
-
-      {/* Synchronizace + stránkování */}
-      <section
-        className={
-          "w-full bg-stone-100 dark:bg-slate-900 border-y border-stone-300 dark:border-slate-800 py-5 px-5 md:px-10 lg:px-16"
-        }
-      >
-        <div className="w-full flex flex-col lg:flex-row max-w-7xl mx-auto justify-between items-center gap-4 lg:gap-6">
-          <div className="min-w-0 flex flex-row gap-2 items-center text-sm text-left text-stone-700 dark:text-slate-300">
-            <RefreshCwIcon className="w-5 h-5 shrink-0 text-emerald-700 dark:text-emerald-500" />
-            <span>
-              Všechna data jsou synchronizována s národní databází NDOP AOPK ČR
-              (poslední záloha dnes v 04:00)
-            </span>
-          </div>
-
-          <ul className="flex flex-row gap-2 items-center shrink-0">
-            <li className="shrink-0">
-              <button
-                type="button"
-                disabled
-                className="flex items-center rounded-lg px-3 sm:px-4 py-2 text-sm font-medium bg-white text-stone-400 border border-stone-300 cursor-not-allowed dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700"
-              >
-                Předchozí
-              </button>
-            </li>
-
-            <li className="shrink-0">
-              <button
-                type="button"
-                aria-current="page"
-                className={`${pageBtnBase} font-semibold bg-emerald-700 text-white dark:bg-emerald-600`}
-              >
-                1
-              </button>
-            </li>
-
-            <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>
-                2
-              </button>
-            </li>
-            <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>
-                3
-              </button>
-            </li>
-            <li className="shrink-0 hidden sm:block">
-              <span className="flex items-center justify-center w-9 h-9 text-sm text-stone-400 dark:text-slate-500">
-                ...
-              </span>
-            </li>
-            <li className="shrink-0 hidden sm:block">
-              <button type="button" className={pageBtnIdle}>
-                48
-              </button>
-            </li>
-
-            <li className="shrink-0">
-              <button
-                type="button"
-                className="flex items-center rounded-lg px-3 sm:px-4 py-2 text-sm font-medium bg-white text-stone-700 border border-stone-300 hover:bg-stone-50 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700 transition-colors"
-              >
-                Další
-              </button>
-            </li>
-          </ul>
-        </div>
-      </section>
-    </>
-  );
+import { Camera, Bug, BadgeCheck, Calendar } from "lucide-react";
+export default async function ProfilePage({ params, searchParams }: { params: Promise<{ username: string }>; searchParams: Promise<{ page?: string }> }) {
+  const { username } = await params; const decodedUsername = decodeURIComponent(username); const lowerUsername = decodedUsername.toLowerCase();
+  if (decodedUsername !== lowerUsername) redirect(`/profile/${lowerUsername}`);
+  const profile = await getUserByUsername(lowerUsername); if (!profile) notFound();
+  const isOwnProfile = await getCurrentUserId() === profile.id;
+  const query = await searchParams; const page = Math.max(1, Math.floor(Number(query.page) || 1)); const size = 24;
+  const db = await createClient();
+  const [findings, stats, badges] = await Promise.all([
+    db.from("public_sightings").select("*", { count: "exact" }).eq("user_id", profile.id).order("created_at", { ascending: false }).order("id").range((page - 1) * size, page * size - 1),
+    db.rpc("profile_sighting_stats", { p_user_id: profile.id }).single(),
+    db.from("user_badges").select("id,label").eq("user_id", profile.id),
+  ]);
+  if (findings.error || stats.error || badges.error) throw new Error("Profilové nálezy se nepodařilo načíst.");
+  const values = stats.data;
+  return <>
+    <section className="bg-linear-to-b from-[#f6f7f1] via-emerald-50 to-stone-50 px-5 py-12 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"><div className="mx-auto max-w-7xl">
+      <UserSearchBar /><ProfileHeaderCard profile={profile} isOwnProfile={isOwnProfile} />
+      <div className="grid grid-cols-2 gap-4 py-8 lg:grid-cols-4">{[
+        { icon: Camera, number: values.sighting_count, title: "Nahraných nálezů" },
+        { icon: Bug, number: values.species_count, title: "Potvrzených druhů" },
+        { icon: BadgeCheck, number: values.confirmed_count, title: "Potvrzených nálezů" },
+        { icon: Calendar, number: values.backdated_count, title: "Zpětných nálezů" },
+      ].map(stat => <HeroCard key={stat.title} icon={stat.icon} number={String(stat.number)} title={stat.title} iconColor="bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-400" />)}</div>
+      {isOwnProfile && <p className="text-sm text-stone-500 dark:text-slate-400">Tvoje historie a statistiky zahrnují i soukromé a skryté nálezy.</p>}
+    </div></section>
+    <ProfileFindingsSection sightings={findings.data ?? []} badges={badges.data ?? []} authorName={profile.display_name || profile.username || "Uživatel"} />
+    <nav aria-label="Stránkování nálezů" className="flex justify-center gap-6 bg-stone-100 px-5 py-6 text-stone-900 dark:bg-slate-950 dark:text-slate-100">
+      {page > 1 && <Link className="underline" href={`/profile/${lowerUsername}?page=${page - 1}`}>Předchozí</Link>}
+      {page * size < (findings.count ?? 0) && <Link className="underline" href={`/profile/${lowerUsername}?page=${page + 1}`}>Další</Link>}
+    </nav>
+  </>;
 }

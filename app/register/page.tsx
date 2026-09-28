@@ -26,17 +26,7 @@ export default function RegisterForm() {
     confirmPassword.length > 0 && password !== confirmPassword;
 
 useEffect(() => {
-  if (username.length === 0) {
-    setUsernameStatus("idle");
-    return;
-  }
-
-  if (!USERNAME_REGEX.test(username)) {
-    setUsernameStatus("invalid");
-    return;
-  }
-
-  setUsernameStatus("checking");
+  if (!username || !USERNAME_REGEX.test(username)) return;
 
   const controller = new AbortController();
 
@@ -61,6 +51,12 @@ const timeout = setTimeout(async () => {
     controller.abort();
   };
 }, [username]);
+
+  function handleUsernameChange(value: string) {
+    const next = value.toLowerCase();
+    setUsername(next);
+    setUsernameStatus(!next ? "idle" : USERNAME_REGEX.test(next) ? "checking" : "invalid");
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -254,7 +250,7 @@ const timeout = setTimeout(async () => {
                   placeholder="uzivatelske_jmeno"
                   name="username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                  onChange={(e) => handleUsernameChange(e.target.value)}
                   required
                   autoComplete="username"
                   minLength={3}

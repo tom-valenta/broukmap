@@ -2,6 +2,7 @@ import { createClient as createPublicClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
 import { fetchInaturalist, isSelectableInsect } from "@/lib/inaturalist";
+import { clientRateLimitKey, rateLimitHeaders, takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
@@ -23,16 +24,19 @@ function publicDb() {
   );
 }
 
-function reply(data: unknown, status = 200, cache = false) {
+function reply(data: unknown, status = 200, cache = false, headers: HeadersInit = {}) {
   return Response.json(data, {
     status,
-    headers: { "Cache-Control": cache && status === 200 ? "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800" : "no-store" },
+    headers: { "Cache-Control": cache && status === 200 ? "public, max-age=60, s-maxage=86400, stale-while-revalidate=604800" : "no-store", ...headers },
   });
 }
 
 export async function GET(request: Request) {
   const query = new URL(request.url).searchParams.get("q")?.trim().slice(0, 80) ?? "";
   if (query.length < 2) return reply({ results: [] }, 200, true);
+  const limit = 30;
+  const quota = takeRateLimit(`species-search:${clientRateLimitKey(request)}`, { limit, windowMs: 60_000 });
+  if (!quota.allowed) return reply({ error: "Too many requests" }, 429, false, rateLimitHeaders(quota, limit));
   const localNeedle = query.replace(/[%_(),.*]/g, " ").trim();
 
   try {
@@ -79,6 +83,9 @@ export async function POST(request: Request) {
     const supabase = await createServerClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return reply({ error: "Sign in required" }, 401);
+    const limit = 12;
+    const quota = takeRateLimit(`species-register:${user.id}`, { limit, windowMs: 60_000 });
+    if (!quota.allowed) return reply({ error: "Too many requests" }, 429, false, rateLimitHeaders(quota, limit));
 
     const taxon = (await fetchInaturalist(`/taxa/${taxonId}?locale=cs`, 604800))[0];
     if (!taxon || !isSelectableInsect(taxon)) return reply({ error: "Taxon is not a selectable insect species" }, 400);

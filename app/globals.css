@@ -1,29 +1,217 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* =========================
+   LIGHT MODE — denní les
+   ========================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  /* Layout / surfaces */
+  --background: #fbf9f2;
+  --background-muted: #f3efe4;
+  --surface: #ffffff;
+  --surface-muted: #f3efe4;
+  --surface-hover: #efede4;
 
-.dark {
-  --background: #020617;
-  --foreground: #ededed;
-}
+  /* Text */
+  --foreground: #20362b;
+  --foreground-muted: #68766a;
+  --foreground-subtle: #87958a;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Brand */
+  --brand: #20362b;
+  --brand-dark: #17291f;
+  --brand-hover: #2e4b39;
+
+  /* Primary — zlaté CTA */
+  --primary: #e4b83f;
+  --primary-hover: #f1d16a;
+  --primary-foreground: #20362b;
+
+  /* Accent — smaragdová */
+  --accent: #087a59;
+  --accent-hover: #19a879;
+  --accent-foreground: #ffffff;
+
+  /* Nature colors */
+  --moss: #526a38;
+  --moss-muted: #7b8c42;
+  --fern: #a6b76b;
+  --fern-muted: #dce5c7;
+  --amber: #a96f22;
+  --bark: #65472a;
+
+  /* UI states */
+  --border: #c9d5bf;
+  --border-strong: #b7c5b6;
+  --ring: #7b8c42;
+  --success: #087a59;
+  --warning: #c99235;
+  --danger: #b64943;
+
+  /* Typography */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+
+/* =========================
+   DARK MODE — noční les
+   ========================= */
+
+.dark {
+  /* Layout / surfaces */
+  --background: #0d1712;
+  --background-muted: #13231a;
+  --surface: #13231a;
+  --surface-muted: #20362b;
+  --surface-hover: #2e4b39;
+
+  /* Text */
+  --foreground: #eef1e5;
+  --foreground-muted: #c4d0c1;
+  --foreground-subtle: #87958a;
+
+  /* Brand */
+  --brand: #20362b;
+  --brand-dark: #0d1712;
+  --brand-hover: #2e4b39;
+
+  /* Primary — zlaté CTA */
+  --primary: #e8bd45;
+  --primary-hover: #f4d875;
+  --primary-foreground: #0d1712;
+
+  /* Accent — smaragdová */
+  --accent: #15b982;
+  --accent-hover: #4bd7a4;
+  --accent-foreground: #0d1712;
+
+  /* Nature colors */
+  --moss: #526a38;
+  --moss-muted: #71884a;
+  --fern: #a8bd70;
+  --fern-muted: #cbd8a1;
+  --amber: #c99235;
+  --bark: #a9784d;
+
+  /* UI states */
+  --border: #30473a;
+  --border-strong: #3d5847;
+  --ring: #a8bd70;
+  --success: #15b982;
+  --warning: #e8bd45;
+  --danger: #e27669;
+}
+
+
+/* =========================
+   Tailwind v4 theme tokens
+   ========================= */
+
+@theme inline {
+  /* Layout */
+  --color-background: var(--background);
+  --color-background-muted: var(--background-muted);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-hover: var(--surface-hover);
+
+  /* Text */
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+
+  /* Brand */
+  --color-brand: var(--brand);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-hover: var(--brand-hover);
+
+  /* Primary */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+
+  /* Accent */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Nature colors */
+  --color-moss: var(--moss);
+  --color-moss-muted: var(--moss-muted);
+  --color-fern: var(--fern);
+  --color-fern-muted: var(--fern-muted);
+  --color-amber: var(--amber);
+  --color-bark: var(--bark);
+
+  /* UI states */
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  /* Fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+
+/* =========================
+   Base styles
+   ========================= */
+
 html {
   background: var(--background);
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
+  min-height: 100vh;
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ring) 65%, transparent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Mouse users drag; keyboard focus reveals accessible ordering controls. */
+@media (hover: hover) and (pointer: fine) {
+  .photo-order-buttons { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .photo-order-buttons:focus-within { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
 }
