@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 
-export function galleryPhotoUrl(id: string, path: string, width = 1280) {
+export function galleryPhotoUrl(id: string, path: string, width = 960) {
   return `/sightings/${id}/photo?photo=${encodeURIComponent(path)}&w=${width}`;
 }
 
@@ -22,14 +22,14 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const step = (direction: number) => onSelect(paths[(index + direction + paths.length) % paths.length]);
   useEffect(() => {
     if (paths.length < 2 || loaded !== src) return;
-    // Warm the whole bounded gallery with only two low-priority downloads at
-    // once. Decode before navigation so fast arrow presses don't hit a cold slide.
+    // Do not compete with the LCP image by downloading the whole gallery.
+    // One small adjacent preview keeps the next navigation responsive.
     let cancelled = false;
-    const queue = Array.from({ length: paths.length - 1 }, (_, offset) => paths[(index + offset + 1) % paths.length]);
+    const queue = [paths[(index + 1) % paths.length]];
     async function warm() {
       while (!cancelled && queue.length) {
         const path = queue.shift()!;
-        const url = galleryPhotoUrl(id, path);
+        const url = galleryPhotoUrl(id, path, 320);
         const image = new Image(); image.fetchPriority = "low"; image.src = url;
         try {
           await image.decode();
@@ -37,7 +37,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
         } catch { /* Foreground navigation shows errors and retries normally. */ }
       }
     }
-    void warm(); void warm();
+    void warm();
     return () => { cancelled = true; };
   }, [id, index, paths, loaded, src]);
   useEffect(() => {
@@ -64,7 +64,6 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   function picture(fullscreen: boolean) {
     return <>
       <div className={`relative ${fullscreen ? "h-full w-full" : "h-[min(60vh,38rem)] min-h-64 w-full"}`}>
-        <img src={galleryPhotoUrl(id, selected, 320)} alt="" aria-hidden="true" decoding="async" className="absolute inset-0 h-full w-full object-contain" />
         <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />
       </div>
       {loaded !== src && !decoded.has(src) && failed !== src && <span role="status" className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-lg bg-black/65 px-3 py-1 text-sm text-white">Načítám…</span>}

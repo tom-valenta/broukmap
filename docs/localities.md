@@ -6,9 +6,7 @@ Nominatim returns city/town/village/hamlet/municipality, never a street or house
 
 ## Deployment
 
-Development uses `.cache/geocoding`. **Production must set `GEOCODING_CACHE_DIR` to persistent writable storage shared by ALL app processes.** Without it lookups fail closed. The shared exclusive file lock serializes calls with at least 1.1 seconds between requests, including failures. Successful results (including no settlement found) persist across restarts. Do not deploy this adapter on independent serverless filesystems; use a single geocoding server/shared volume instead.
-
-If a process crashes while holding `provider.lock`, calls fail closed. Stop geocoding workers, remove only that lock file, then restart. Keep cached JSON files. Do not clear the cache on deployment.
+Responses from the reverse-geocoding URL are cached for 30 days by Next's fetch cache, which is durable on Vercel and does not require a writable serverless filesystem. Within one application instance, misses are spaced at least 1.1 seconds apart. A new deployment can have cold cache entries, so keep traffic modest or use a dedicated provider when traffic grows.
 
 `NOMINATIM_URL` changes the reverse endpoint without source edits. Default: `https://nominatim.openstreetmap.org/reverse`. Server identifies itself as BroukMap; profile displays OSM attribution. No periodic or bulk backfill jobs. For larger traffic use a dedicated provider.
 

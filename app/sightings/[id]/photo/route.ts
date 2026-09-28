@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const path = sightingPhotoPath((requested === null ? paths[0] : paths.find(item => item === requested)) ?? null);
   if (!path) return fail(404);
   const width = query.get("w");
-  const size = width === "320" ? 320 : width === "640" ? 640 : width === "1280" ? 1280 : null;
+  const size = width === "320" ? 320 : width === "640" ? 640 : width === "960" ? 960 : width === "1280" ? 1280 : null;
   let photo: Photo;
   try {
     photo = await variants.get(`${path}:${size ?? "original"}`, async () => {
