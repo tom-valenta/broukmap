@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- Access-controlled photo endpoint. */
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { ChevronLeft, ChevronRight, Maximize2, X } from "lucide-react";
 import { signedSightingPhotoUrl, useSightingPhotoUrl } from "./SightingPhoto";
 
@@ -12,6 +12,7 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
   const opener = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const index = Math.max(0, paths.indexOf(selected));
   // A detail needs more pixels than a map card; the dialog gets a near-native
   // rendition so 4K uploads stay sharp on desktop displays.
@@ -51,6 +52,15 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     return () => { document.body.style.overflow = previous; };
   }, [expanded]);
   function close() { dialog.current?.close(); setExpanded(false); setZoomed(false); opener.current?.focus(); }
+  function toggleZoom(event: MouseEvent<HTMLButtonElement>) {
+    if (zoomed) { setZoomed(false); return; }
+    const bounds = event.currentTarget.getBoundingClientRect();
+    setZoomOrigin({
+      x: Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100)),
+      y: Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100)),
+    });
+    setZoomed(true);
+  }
   function keyboard(event: KeyboardEvent<HTMLElement>) {
     if (event.altKey || event.ctrlKey || event.metaKey || paths.length < 2) return;
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -65,10 +75,10 @@ export default function PhotoViewer({ id, paths, selected, onSelect }: {
     <span aria-live="polite" className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold tabular-nums text-white">{index + 1} / {paths.length}</span>
   </>;
   function picture(fullscreen: boolean) {
-    const image = src && <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} className={`relative h-full w-full object-contain transition-transform duration-200 ${fullscreen && zoomed ? "scale-[2]" : "scale-100"} ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />;
+    const image = src && <img src={src} alt={`Fotografie nálezu ${index + 1} z ${paths.length}`} decoding="async" fetchPriority="high" onLoad={() => { setLoaded(src); setDecoded(current => new Set(current).add(src)); }} onError={() => setFailed(src)} style={fullscreen ? { transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` } : undefined} className={`relative h-full w-full object-contain transition-transform duration-200 ${fullscreen && zoomed ? "scale-[2]" : "scale-100"} ${loaded === src || decoded.has(src) ? "opacity-100" : "opacity-0"}`} />;
     return <>
       <div className={`relative ${fullscreen ? "h-full w-full overflow-hidden" : "h-[min(60vh,38rem)] min-h-64 w-full"}`}>
-        {fullscreen ? <button type="button" onClick={() => setZoomed(current => !current)} aria-label={zoomed ? "Oddálit fotografii" : "Přiblížit fotografii"} className={`block h-full w-full ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}>{image}</button> : image}
+        {fullscreen ? <button type="button" onClick={toggleZoom} aria-label={zoomed ? "Oddálit fotografii" : "Přiblížit fotografii"} className={`block h-full w-full ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}>{image}</button> : image}
       </div>
       {(!src || (loaded !== src && !decoded.has(src) && failed !== src)) && <span role="status" className="pointer-events-none absolute bottom-12 left-1/2 -translate-x-1/2 rounded-lg bg-black/65 px-3 py-1 text-sm text-white">Načítám…</span>}
       {failed === src && <span role="alert" className="absolute inset-x-14 top-1/2 rounded-lg bg-black/75 p-3 text-center text-sm text-white">Fotografii se nepodařilo načíst. Zkus jiný snímek nebo obnov stránku.</span>}
