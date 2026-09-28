@@ -19,7 +19,10 @@ export function locateMap(force = false): Promise<LocationPoint> {
     }, error => {
       if (error.code === 1) recent = null;
       reject(new Error(error.code === 1 ? "Povol přístup k poloze v nastavení prohlížeče." : "Polohu se nepodařilo zjistit. Zkus to znovu."));
-    }, { enableHighAccuracy: false, maximumAge: force ? 0 : 60000, timeout: 6000 });
+  // On first map open, an old browser fix is much more useful than waiting
+  // several seconds for a new GPS/Wi-Fi lookup. The explicit locate button
+  // still requests a fresh position.
+  }, { enableHighAccuracy: false, maximumAge: force ? 0 : Infinity, timeout: 6000 });
   }).finally(() => { pending = null; });
   return pending;
 }

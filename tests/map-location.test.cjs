@@ -13,7 +13,7 @@ function locationModule() {
 test('Strict Mode mounts share a single quick location request and reuse a fresh fix', async () => {
   const geo = locationModule();
   const first = geo.locateMap(); const second = geo.locateMap();
-  assert.equal(geo.calls(), 1); assert.equal(geo.options().enableHighAccuracy, false);
+  assert.equal(geo.calls(), 1); assert.equal(geo.options().enableHighAccuracy, false); assert.equal(geo.options().maximumAge, Infinity);
   geo.success();
   assert.deepEqual(await first, await second);
   await geo.locateMap(); assert.equal(geo.calls(), 1);
