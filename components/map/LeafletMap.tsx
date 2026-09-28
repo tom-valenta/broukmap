@@ -16,14 +16,6 @@ export type Bounds = { south: number; north: number; west: number; east: number 
 const icon = (color: string, symbol: string) => divIcon({ className: "bugmap-marker", html: `<span style="background:${color}"><b>${symbol}</b></span>`, iconSize: [36, 44], iconAnchor: [18, 40], popupAnchor: [0, -40] });
 const neutral = icon("#64748b", "?"); const confirmed = icon("#047857", "✓"); const draft = icon("#c2410c", "+");
 const wrap = (longitude: number) => ((longitude + 180) % 360 + 360) % 360 - 180;
-const prefetchedPhotos = new Set<string>();
-function prefetchPhoto(id: string) {
-  const url = `/sightings/${id}/photo?w=320`;
-  if (prefetchedPhotos.has(url)) return;
-  prefetchedPhotos.add(url);
-  const image = new Image();
-  image.src = url;
-}
 type LocationControls = { locateRequest: number; initialLocation: LocationPoint | null };
 function Events({ onPick, onBounds, locateRequest, initialLocation }: LocationControls & { onPick: (point: [number, number]) => void; onBounds: (bounds: Bounds) => void }) {
   const pendingClick = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -88,23 +80,23 @@ function Events({ onPick, onBounds, locateRequest, initialLocation }: LocationCo
       pathOptions={{ color: "white", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }} />
   </>;
 }
-export default function LeafletMap({ sightings, pin, onPick, onMovePin, onBounds, locateRequest, initialLocation }: LocationControls & { sightings: MapSighting[]; pin: [number, number] | null; onPick: (p: [number, number]) => void; onMovePin: (p: [number, number]) => void; onBounds: (b: Bounds) => void }) {
+export default function LeafletMap({ sightings, pin, onPick, onMovePin, onBounds, locateRequest, initialLocation, mapHref }: LocationControls & { sightings: MapSighting[]; pin: [number, number] | null; onPick: (p: [number, number]) => void; onMovePin: (p: [number, number]) => void; onBounds: (b: Bounds) => void; mapHref: string }) {
   return <MapContainer center={initialLocation?.point ?? [49.8, 15.5]} zoom={initialLocation ? 13 : 7} minZoom={2} maxZoom={19} doubleClickZoom worldCopyJump className="bugmap-map" attributionControl zoomControl={false}>
     <ZoomControl position="bottomright" />
     <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} updateWhenIdle keepBuffer={2} />
     <Events onPick={onPick} onBounds={onBounds} locateRequest={locateRequest} initialLocation={initialLocation} />
-    <SightingMarkers sightings={sightings} />
+    <SightingMarkers sightings={sightings} mapHref={mapHref} />
     {pin && <Marker position={pin} icon={draft} draggable autoPan title="Poloha nového nálezu — přetažením upřesni" eventHandlers={{ dragend: event => { const p = (event.target as LeafletMarker).getLatLng(); onMovePin([Math.max(-90, Math.min(90, p.lat)), wrap(p.lng)]); } }} />}
   </MapContainer>;
 }
 
 
 
-const SightingMarkers = memo(function SightingMarkers({ sightings }: { sightings: MapSighting[] }) {
+const SightingMarkers = memo(function SightingMarkers({ sightings, mapHref }: { sightings: MapSighting[]; mapHref: string }) {
   return (
     <MarkerClusterGroup chunkedLoading chunkInterval={16} chunkDelay={16} animate={false} showCoverageOnHover={false} removeOutsideVisibleBounds>
-      {sightings.filter(s => s.id && s.latitude != null && s.longitude != null && s.geoprivacy !== "private").map(s => <Marker key={s.id} position={[s.latitude!, s.longitude!]} opacity={s.geoprivacy === "open" ? 1 : 0.6} icon={s.id_status === "confirmed" ? confirmed : neutral} eventHandlers={{ mouseover: () => prefetchPhoto(s.id!), popupopen: () => prefetchPhoto(s.id!) }}>
-        <Popup><div className="w-52 space-y-2">{s.photo_url && <img src={`/sightings/${s.id}/photo?w=320`} alt="Fotografie nálezu" loading="eager" decoding="async" className="h-28 w-full rounded-lg object-cover" />}<strong>{sightingName(s)}</strong><p>{statusLabel(s.id_status)}</p><p>{locationLabel(s)}</p>{s.location_precision === "exact" && s.geoprivacy !== "open" && <p>Skutečná poloha, viditelná jen tobě (autor/admin).</p>}<Link href={`/sightings/${s.id}`}>Detail a určení →</Link></div></Popup>
+      {sightings.filter(s => s.id && s.latitude != null && s.longitude != null && s.geoprivacy !== "private").map(s => <Marker key={s.id} position={[s.latitude!, s.longitude!]} opacity={s.geoprivacy === "open" ? 1 : 0.6} icon={s.id_status === "confirmed" ? confirmed : neutral}>
+        <Popup><div className="w-52 space-y-2">{s.photo_url && <img src={`/sightings/${s.id}/photo?w=320`} alt="Fotografie nálezu" loading="eager" decoding="async" className="h-28 w-full rounded-lg object-cover" />}<strong>{sightingName(s)}</strong><p>{statusLabel(s.id_status)}</p><p>{locationLabel(s)}</p>{s.location_precision === "exact" && s.geoprivacy !== "open" && <p>Skutečná poloha, viditelná jen tobě (autor/admin).</p>}<Link href={`/sightings/${s.id}?from=${encodeURIComponent(mapHref)}`}>Detail a určení →</Link></div></Popup>
       </Marker>)}
     </MarkerClusterGroup>
   );

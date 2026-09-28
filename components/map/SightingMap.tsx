@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { useAuth } from "@/app/contexts/AuthProvider";
 import { createClient } from "@/lib/supabase/client";
 import MapFilters from "./MapFilters";
-import { mapDateRange, mapSpeciesExpression, type MapFilters as FilterState } from "@/lib/map-filters";
+import { defaultMapFilters, mapDateRange, mapFiltersFromSearch, mapFiltersSearch, mapSpeciesExpression, type MapFilters as FilterState } from "@/lib/map-filters";
 import { buttonClass, localToday } from "@/lib/sightings";
 import { MAP_SIGHTING_FIELDS, type MapSighting } from "@/lib/map-sightings";
 import type { Bounds } from "./LeafletMap";
@@ -15,7 +15,8 @@ const Map = dynamic(() => import("./LeafletMap"), { ssr: false, loading: () => <
 export default function SightingMap() {
   const { user } = useAuth();
   const [today, setToday] = useState(localToday);
-  const [filters, setFilters] = useState<FilterState>(() => ({ period: "today", day: localToday(), year: localToday().slice(0, 4), dateField: "created_at", status: "all", species: [] }));
+  const [filters, setFilters] = useState<FilterState>(() => typeof window === "undefined" ? defaultMapFilters(localToday()) : mapFiltersFromSearch(new URLSearchParams(window.location.search), localToday()));
+  const mapHref = `/map${mapFiltersSearch(filters, today)}`;
   const filterKey = JSON.stringify([filters, filters.period === "today" ? today : ""]);
   const [loadedFilter, setLoadedFilter] = useState("");
   const [queryPending, setQueryPending] = useState(false);
@@ -37,6 +38,9 @@ export default function SightingMap() {
     locateMap().then(position => { if (!disposed) setInitialLocation(position); }).catch(() => {});
     return () => { disposed = true; };
   }, []);
+  useEffect(() => {
+    if (`${window.location.pathname}${window.location.search}` !== mapHref) window.history.replaceState(null, "", mapHref);
+  }, [mapHref]);
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
@@ -86,7 +90,7 @@ export default function SightingMap() {
     return () => { clearTimeout(timer); controller.abort(); };
   }, [bounds, user?.id, filters, today, filterKey]);
   return <section aria-label="Mapa nálezů" className="fixed inset-x-0 top-0 isolate h-dvh overflow-hidden bg-stone-50 text-stone-900 dark:bg-slate-950 dark:text-slate-100">
-    <Map sightings={sightingViewer === (user?.id ?? null) && loadedFilter === filterKey ? sightings : []} pin={pin} onPick={onPick} onMovePin={setPin} onBounds={onBounds} locateRequest={locateRequest} initialLocation={initialLocation} />
+    <Map sightings={sightingViewer === (user?.id ?? null) && loadedFilter === filterKey ? sightings : []} pin={pin} onPick={onPick} onMovePin={setPin} onBounds={onBounds} locateRequest={locateRequest} initialLocation={initialLocation} mapHref={mapHref} />
     <div className="absolute right-3 bottom-[calc(28px+env(safe-area-inset-bottom))] z-10 flex max-w-[calc(100%-24px)] items-center gap-3 sm:right-5">
       {locationMessage && <p role="status" className="rounded-xl bg-white/95 px-3 py-2 text-sm shadow-lg dark:bg-slate-900/95">{locationMessage}</p>}
       <button type="button" aria-label="Zpět na moji aktuální polohu" title="Moje poloha"

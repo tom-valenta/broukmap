@@ -18,8 +18,10 @@ function formatDate(value: string | null) {
   return new Intl.DateTimeFormat("cs-CZ", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(value));
 }
 
-export default async function SightingPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SightingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ from?: string }> }) {
   const { id } = await params;
+  const { from } = await searchParams;
+  const mapHref = from === "/map" || from?.startsWith("/map?") ? from : "/map";
   const db = await createClient();
   const { data: { user } } = await db.auth.getUser();
   const { data: s, error } = await db.from("public_sightings").select("*").eq("id", id).maybeSingle();
@@ -45,7 +47,7 @@ export default async function SightingPage({ params }: { params: Promise<{ id: s
   return <section className="flex-1 bg-[var(--background)] px-4 py-7 text-[var(--foreground)] sm:px-6 lg:px-8 lg:py-10">
     <div className="mx-auto max-w-7xl">
       <div className="mb-7 flex flex-wrap items-center justify-between gap-3 text-sm">
-        <Link href="/map" className="inline-flex items-center gap-2 font-semibold text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]">← Zpět na mapu</Link>
+        <Link href={mapHref} className="inline-flex items-center gap-2 font-semibold text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]">← Zpět na mapu</Link>
         <Link href="/help-verify" className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-4 py-2 font-semibold transition hover:bg-[var(--surface-hover)]">Pomoz určit</Link>
       </div>
 

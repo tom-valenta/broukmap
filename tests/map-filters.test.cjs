@@ -5,7 +5,7 @@ const ts = require('typescript');
 process.env.TZ = 'Europe/Prague';
 const exportsObject = {};
 new Function('exports', ts.transpileModule(fs.readFileSync('lib/map-filters.ts','utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText)(exportsObject);
-const { mapDateRange } = exportsObject;
+const { mapDateRange, mapFiltersFromSearch, mapFiltersSearch } = exportsObject;
 const filters = { period:'today', day:'2026-09-27', year:'2026', dateField:'created_at', status:'all', species:[] };
 test('today follows local midnight while a selected date stays fixed', () => {
   assert.deepEqual(mapDateRange(filters,'2026-09-28'), { from:'2026-09-27T22:00:00.000Z', until:'2026-09-28T22:00:00.000Z' });
@@ -31,4 +31,10 @@ test('multiple species compose one OR and text cannot inject PostgREST operators
   assert.equal(mapSpeciesExpression([{id,label:'species'},{id:'text:roháč',label:'roháč'}]),`species_id.in.(${id}),species_name_text.ilike.*roháč*`);
   assert.equal(mapSpeciesExpression([{id:'text:),status.eq.hidden,*',label:'x'}]),'species_name_text.ilike.*status eq hidden*');
   assert.equal(mapSpeciesExpression([]),null);
+});
+test('map filter links restore an explicit day and species after returning from a sighting', () => {
+  const selected = { period:'day', day:'2026-09-27', year:'2026', dateField:'found_date', status:'confirmed', species:[{id:'text:roháč',label:'roháč'}] };
+  const search = mapFiltersSearch(selected, '2026-09-28');
+  assert.deepEqual(mapFiltersFromSearch(new URLSearchParams(search), '2026-09-28'), selected);
+  assert.equal(mapFiltersSearch({ ...filters, day:'2026-09-28' }, '2026-09-28'), '');
 });
