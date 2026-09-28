@@ -1,28 +1,9 @@
-import { createClient as createPublicClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import type { Database } from "@/lib/supabase/database.types";
 import { fetchInaturalist, isSelectableInsect } from "@/lib/inaturalist";
 import { clientRateLimitKey, rateLimitHeaders, takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
-
-type LocalSpecies = {
-  id: string;
-  scientific_name: string;
-  common_name: string | null;
-  family: string | null;
-  inaturalist_taxon_id: number | null;
-  taxon_rank: string | null;
-};
-
-function publicDb() {
-  return createPublicClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
-}
 
 function reply(data: unknown, status = 200, cache = false, headers: HeadersInit = {}) {
   return Response.json(data, {
@@ -37,36 +18,18 @@ export async function GET(request: Request) {
   const limit = 30;
   const quota = takeRateLimit(`species-search:${clientRateLimitKey(request)}`, { limit, windowMs: 60_000 });
   if (!quota.allowed) return reply({ error: "Too many requests" }, 429, false, rateLimitHeaders(quota, limit));
-  const localNeedle = query.replace(/[%_(),.*]/g, " ").trim();
-
   try {
-    const [localSettled, remoteSettled] = await Promise.allSettled([
-      publicDb().from("species")
-        .select("id,scientific_name,common_name,family,inaturalist_taxon_id,taxon_rank")
-        .or(`scientific_name.ilike.%${localNeedle}%,common_name.ilike.%${localNeedle}%`)
-        .order("scientific_name")
-        .limit(12),
-      fetchInaturalist(`/taxa/autocomplete?q=${encodeURIComponent(query)}&locale=cs&per_page=20`, 86400),
-    ]);
-    const localResult = localSettled.status === "fulfilled" ? localSettled.value : null;
-    const remoteTaxa = remoteSettled.status === "fulfilled" ? remoteSettled.value : [];
-    if ((!localResult || localResult.error) && remoteSettled.status === "rejected") throw new Error();
-    const local = (localResult?.data ?? []) as LocalSpecies[];
-    const byTaxon = new Map(local.filter(row => row.inaturalist_taxon_id).map(row => [row.inaturalist_taxon_id, row]));
+    // Never use earlier BugMap selections to rank or populate guesses. This
+    // keeps identifications independent; the local catalogue is used only
+    // after the user selects an authoritative iNaturalist taxon.
+    const remoteTaxa = await fetchInaturalist(`/taxa/autocomplete?q=${encodeURIComponent(query)}&locale=cs&per_page=20`, 86400);
     const seen = new Set<string>();
     const results = [];
-
-    for (const row of local) {
-      const key = row.scientific_name.toLocaleLowerCase("cs");
-      seen.add(key);
-      results.push({ speciesId: row.id, taxonId: row.inaturalist_taxon_id, scientificName: row.scientific_name, commonName: row.common_name, family: row.family, rank: row.taxon_rank ?? "species" });
-    }
     for (const taxon of remoteTaxa.filter(isSelectableInsect)) {
       const key = taxon.name.toLocaleLowerCase("cs");
       if (seen.has(key)) continue;
       seen.add(key);
-      const cached = byTaxon.get(taxon.id);
-      results.push({ speciesId: cached?.id ?? null, taxonId: taxon.id, scientificName: taxon.name, commonName: taxon.preferred_common_name ?? null, family: cached?.family ?? null, rank: taxon.rank });
+      results.push({ speciesId: null, taxonId: taxon.id, scientificName: taxon.name, commonName: taxon.preferred_common_name ?? null, family: null, rank: taxon.rank });
     }
     return reply({ results: results.slice(0, 12) }, 200, true);
   } catch {
