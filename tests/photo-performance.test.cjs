@@ -44,7 +44,7 @@ test('photo redirects to a short-lived transformed Storage URL only after RLS', 
   assert.equal(small.status, 307); assert.equal(large.status, 307);
   assert.match(small.headers.get('location'), /width=320/);
   assert.match(large.headers.get('location'), /width=1280/);
-  assert.equal(signed, 2); assert.equal(queries, 1);
+  assert.equal(signed, 2); assert.equal(queries, 2);
   assert.equal(small.headers.get('cache-control'), 'private, max-age=60, must-revalidate');
   assert.equal((await get(320, {}, '&photo=foreign.jpg')).status, 404);
   allowed = false;

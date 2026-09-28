@@ -1,9 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { sightingPhotoPath } from "@/lib/sighting-photo";
-import { createHash } from "node:crypto";
 
-export const runtime = "nodejs";
-const accessRequests = new Map<string, Promise<string[]>>();
+export const runtime = "edge";
 const SIGNED_URL_TTL_SECONDS = 90;
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,23 +10,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const supabase = await createClient();
   const query = new URL(request.url).searchParams;
   const fail = (status: number) => new Response("Fotografie není dostupná.", { status, headers: { "Cache-Control": "no-store" } });
-  // Coalesce only concurrent checks for the same session and sighting. Every
-  // later request still executes Storage RLS before receiving a signed URL.
-  const accessKey = createHash("sha256").update(`${id}:${request.headers.get("cookie") ?? ""}`).digest("hex");
-  let access = accessRequests.get(accessKey);
-  if (!access) {
-    access = (async () => {
-      const { data: gallery, error } = await supabase.from("sighting_photo_sets").select("paths").eq("sighting_id", id).maybeSingle();
-      if (error) throw error;
-      if (gallery) return gallery.paths;
+  let paths: string[];
+  try {
+    // Photo-set SELECT RLS enforces private/hidden/owner/admin access before
+    // the Edge function creates a Storage signed URL.
+    const { data: gallery, error } = await supabase.from("sighting_photo_sets").select("paths").eq("sighting_id", id).maybeSingle();
+    if (error) throw error;
+    if (gallery) paths = gallery.paths;
+    else {
       const { data: visible, error: legacyError } = await supabase.from("public_sightings").select("photo_url").eq("id", id).maybeSingle();
       if (legacyError) throw legacyError;
-      return visible?.photo_url ? [visible.photo_url] : [];
-    })().finally(() => { accessRequests.delete(accessKey); });
-    accessRequests.set(accessKey, access);
-  }
-  let paths: string[];
-  try { paths = await access; } catch { return fail(503); }
+      paths = visible?.photo_url ? [visible.photo_url] : [];
+    }
+  } catch { return fail(503); }
   const requested = query.get("photo");
   const path = sightingPhotoPath((requested === null ? paths[0] : paths.find(item => item === requested)) ?? null);
   if (!path) return fail(404);
