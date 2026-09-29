@@ -12,8 +12,22 @@ function reply(data: unknown, status = 200, cache = false, headers: HeadersInit 
   });
 }
 
+function locale(value: string | null) {
+  const candidate = value?.trim().slice(0, 35) ?? "en";
+  return /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(candidate) ? candidate : "en";
+}
+
+async function localizedTaxa(path: string, preferredLocale: string, revalidate: number) {
+  const taxa = await fetchInaturalist(`${path}&locale=${encodeURIComponent(preferredLocale)}`, revalidate);
+  if (preferredLocale.toLowerCase().startsWith("en") || taxa.every(taxon => taxon.preferred_common_name)) return taxa;
+  const english = await fetchInaturalist(`${path}&locale=en`, revalidate);
+  const englishNames = new Map(english.map(taxon => [taxon.id, taxon.preferred_common_name]));
+  return taxa.map(taxon => ({ ...taxon, preferred_common_name: taxon.preferred_common_name ?? englishNames.get(taxon.id) ?? null }));
+}
+
 export async function GET(request: Request) {
   const query = new URL(request.url).searchParams.get("q")?.trim().slice(0, 80) ?? "";
+  const preferredLocale = locale(new URL(request.url).searchParams.get("locale"));
   if (query.length < 2) return reply({ results: [] }, 200, true);
   const limit = 30;
   const quota = takeRateLimit(`species-search:${clientRateLimitKey(request)}`, { limit, windowMs: 60_000 });
@@ -22,7 +36,7 @@ export async function GET(request: Request) {
     // Never use earlier BugMap selections to rank or populate guesses. This
     // keeps identifications independent; the local catalogue is used only
     // after the user selects an authoritative iNaturalist taxon.
-    const remoteTaxa = await fetchInaturalist(`/taxa/autocomplete?q=${encodeURIComponent(query)}&locale=cs&per_page=20`, 86400);
+    const remoteTaxa = await localizedTaxa(`/taxa/autocomplete?q=${encodeURIComponent(query)}&per_page=20`, preferredLocale, 86400);
     const seen = new Set<string>();
     const results = [];
     for (const taxon of remoteTaxa.filter(isSelectableInsect)) {
@@ -39,7 +53,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { taxonId?: unknown };
+    const body = await request.json() as { taxonId?: unknown; locale?: unknown };
     const taxonId = Number(body.taxonId);
     if (!Number.isSafeInteger(taxonId) || taxonId <= 0) return reply({ error: "Invalid taxon" }, 400);
 
@@ -50,7 +64,8 @@ export async function POST(request: Request) {
     const quota = takeRateLimit(`species-register:${user.id}`, { limit, windowMs: 60_000 });
     if (!quota.allowed) return reply({ error: "Too many requests" }, 429, false, rateLimitHeaders(quota, limit));
 
-    const taxon = (await fetchInaturalist(`/taxa/${taxonId}?locale=cs`, 604800))[0];
+    const preferredLocale = locale(typeof body.locale === "string" ? body.locale : null);
+    const taxon = (await localizedTaxa(`/taxa/${taxonId}?`, preferredLocale, 604800))[0];
     if (!taxon || !isSelectableInsect(taxon)) return reply({ error: "Taxon is not a selectable insect species" }, 400);
     const family = taxon.ancestors?.find(ancestor => ancestor.rank === "family")?.name ?? null;
     const { data: speciesId, error } = await supabase.rpc("register_inaturalist_species", {

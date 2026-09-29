@@ -16,6 +16,8 @@ type SpeciesOption = {
 const displayName = (option: Pick<SpeciesOption, "commonName" | "scientificName">) =>
   option.commonName ? `${option.commonName} · ${option.scientificName}` : option.scientificName;
 
+const browserLocale = () => typeof navigator === "undefined" ? "en" : navigator.languages?.[0] || navigator.language || "en";
+
 export default function SpeciesPicker({ value, onChange, label = "Tip na druh (nepovinné)", textAllowed = false }: {
   value: Guess;
   onChange: (value: Guess) => void;
@@ -30,6 +32,7 @@ export default function SpeciesPicker({ value, onChange, label = "Tip na druh (n
   const [error, setError] = useState("");
   const [active, setActive] = useState(0);
   const [searched, setSearched] = useState("");
+  const locale = browserLocale();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -40,7 +43,7 @@ export default function SpeciesPicker({ value, onChange, label = "Tip na druh (n
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/species?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+        const response = await fetch(`/api/species?q=${encodeURIComponent(query)}&locale=${encodeURIComponent(locale)}`, { signal: controller.signal });
         if (!response.ok) throw new Error();
         const payload = await response.json() as { results?: SpeciesOption[] };
         if (!controller.signal.aborted) {
@@ -60,7 +63,7 @@ export default function SpeciesPicker({ value, onChange, label = "Tip na druh (n
       }
     }, 250);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [value.text, value.speciesId]);
+  }, [value.text, value.speciesId, locale]);
 
   async function select(option: SpeciesOption) {
     setError("");
@@ -72,7 +75,7 @@ export default function SpeciesPicker({ value, onChange, label = "Tip na druh (n
         const response = await fetch("/api/species", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taxonId: option.taxonId }),
+          body: JSON.stringify({ taxonId: option.taxonId, locale }),
         });
         if (!response.ok) throw new Error();
         const saved = await response.json() as SpeciesOption;
