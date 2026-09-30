@@ -5,14 +5,14 @@ import type { MapSighting } from "@/lib/map-sightings";
 import type { LocationPoint } from "@/lib/map-location";
 import Link from "next/link";
 import { divIcon, latLng, type Marker as LeafletMarker } from "leaflet";
-import { CircleMarker, MapContainer, TileLayer, Marker, Popup, ZoomControl, useMapEvents } from "react-leaflet";
+import { CircleMarker, MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap, useMapEvents } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { locationLabel, sightingName, statusLabel } from "@/lib/sightings";
 import "leaflet/dist/leaflet.css";
 import "react-leaflet-cluster/dist/assets/MarkerCluster.css";
 import "react-leaflet-cluster/dist/assets/MarkerCluster.Default.css";
 import "./map.css";
-import { SightingPhoto } from "@/components/sightings/SightingPhoto";
+import { preloadSightingPhoto, SightingPhoto } from "@/components/sightings/SightingPhoto";
 export type Bounds = { south: number; north: number; west: number; east: number };
 const icon = (color: string, symbol: string) => divIcon({ className: "bugmap-marker", html: `<span style="background:${color}"><b>${symbol}</b></span>`, iconSize: [36, 44], iconAnchor: [18, 40], popupAnchor: [0, -40] });
 const neutral = icon("#64748b", "?"); const confirmed = icon("#047857", "✓"); const draft = icon("#c2410c", "+");
@@ -86,17 +86,45 @@ export default function LeafletMap({ sightings, pin, onPick, onMovePin, onBounds
     <ZoomControl position="bottomright" />
     <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url="https://tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} updateWhenIdle keepBuffer={2} />
     <Events onPick={onPick} onBounds={onBounds} locateRequest={locateRequest} initialLocation={initialLocation} />
+    <NearbyPhotoPreloader sightings={sightings} />
     <SightingMarkers sightings={sightings} mapHref={mapHref} />
     {pin && <Marker position={pin} icon={draft} draggable autoPan title="Poloha nového nálezu — přetažením upřesni" eventHandlers={{ dragend: event => { const p = (event.target as LeafletMarker).getLatLng(); onMovePin([Math.max(-90, Math.min(90, p.lat)), wrap(p.lng)]); } }} />}
   </MapContainer>;
 }
 
+const PRELOAD_LIMIT = 8;
+
+function NearbyPhotoPreloader({ sightings }: { sightings: MapSighting[] }) {
+  const map = useMap();
+  useEffect(() => {
+    const warmNearbyPhotos = () => {
+      const center = map.getCenter();
+      sightings.filter(s => s.photo_url && s.latitude != null && s.longitude != null)
+        .sort((a, b) => {
+          const distance = (s: MapSighting) => Math.pow(s.latitude! - center.lat, 2) + Math.pow((s.longitude! - center.lng) * Math.cos(center.lat * Math.PI / 180), 2);
+          return distance(a) - distance(b);
+        })
+        .slice(0, PRELOAD_LIMIT)
+        .forEach(s => { void preloadSightingPhoto(s.photo_url, 320); });
+    };
+    warmNearbyPhotos();
+    map.on("moveend", warmNearbyPhotos);
+    return () => { map.off("moveend", warmNearbyPhotos); };
+  }, [map, sightings]);
+  return null;
+}
+
 
 
 const SightingMarkers = memo(function SightingMarkers({ sightings, mapHref }: { sightings: MapSighting[]; mapHref: string }) {
+  const prefetchPhoto = useCallback((path: string | null) => {
+    if (path) void preloadSightingPhoto(path, 320);
+  }, []);
+
   return (
     <MarkerClusterGroup chunkedLoading chunkInterval={16} chunkDelay={16} animate={false} showCoverageOnHover={false} removeOutsideVisibleBounds>
-      {sightings.filter(s => s.id && s.latitude != null && s.longitude != null && s.geoprivacy !== "private").map(s => <Marker key={s.id} position={[s.latitude!, s.longitude!]} opacity={s.geoprivacy === "open" ? 1 : 0.6} icon={s.id_status === "confirmed" ? confirmed : neutral}>
+      {sightings.filter(s => s.id && s.latitude != null && s.longitude != null && s.geoprivacy !== "private").map(s => <Marker key={s.id} position={[s.latitude!, s.longitude!]} opacity={s.geoprivacy === "open" ? 1 : 0.6} icon={s.id_status === "confirmed" ? confirmed : neutral}
+        eventHandlers={{ mouseover: () => prefetchPhoto(s.photo_url), mousedown: () => prefetchPhoto(s.photo_url) }}>
         <Popup><div className="w-52 space-y-2">{s.photo_url && <SightingPhoto path={s.photo_url} width={320} alt="Fotografie nálezu" loading="eager" decoding="async" className="h-28 w-full rounded-lg object-cover" />}<strong>{sightingName(s)}</strong><p>{statusLabel(s.id_status)}</p><p>{locationLabel(s)}</p>{s.location_precision === "exact" && s.geoprivacy !== "open" && <p>Skutečná poloha, viditelná jen tobě (autor/admin).</p>}<Link href={`/sightings/${s.id}?from=${encodeURIComponent(mapHref)}`}>Detail a určení →</Link></div></Popup>
       </Marker>)}
     </MarkerClusterGroup>
