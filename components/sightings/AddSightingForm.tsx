@@ -94,7 +94,7 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
     // File inputs also emit cancel; only handle cancellation of the dialog itself.
     if (event.target !== event.currentTarget) return;
     if (busy || preparing) event.preventDefault(); else onClose();
-  }} className="m-auto max-h-[90dvh] w-[min(94vw,38rem)] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 text-[var(--foreground)] shadow-2xl backdrop:bg-black/50" aria-labelledby="add-title">
+  }} className="m-auto box-border max-h-[90dvh] w-[calc(100vw-1.5rem)] max-w-[38rem] overflow-x-hidden overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 text-[var(--foreground)] shadow-2xl backdrop:bg-black/50" aria-labelledby="add-title">
     <div className="mb-5 flex items-center justify-between gap-4"><h2 id="add-title" className="text-2xl font-bold">Nový nález</h2><button type="button" aria-label="Zavřít formulář" disabled={busy || preparing} className="min-h-11 px-3" onClick={onClose}>✕</button></div>
     <form className="space-y-5" onSubmit={e => { e.preventDefault(); void submit(); }}>
       <p className="text-sm text-[var(--foreground-muted)]">Vybraná poloha: {location[0].toFixed(5)}, {location[1].toFixed(5)}</p>
