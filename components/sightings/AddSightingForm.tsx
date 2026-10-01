@@ -11,6 +11,7 @@ import PhotoOrderButtons from "./PhotoOrderButtons";
 import SpeciesPicker from "./SpeciesPicker";
 export default function AddSightingForm({ location, onClose }: { location: [number, number]; onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const scrollArea = useRef<HTMLDivElement>(null);
   const submitting = useRef(false);
   const router = useRouter();
   const [date, setDate] = useState(localToday);
@@ -49,6 +50,23 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
     finally { preparingRef.current = false; setPreparing(false); }
   }
   useEffect(() => { dialog.current?.showModal(); }, []);
+  useEffect(() => {
+    const element = scrollArea.current;
+    if (!element) return;
+    let start: Touch | null = null;
+    const rememberStart = (event: TouchEvent) => { start = event.touches[0] ?? null; };
+    const blockHorizontalPan = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!start || !touch) return;
+      if (Math.abs(touch.clientX - start.clientX) > Math.abs(touch.clientY - start.clientY)) event.preventDefault();
+    };
+    element.addEventListener("touchstart", rememberStart, { passive: true });
+    element.addEventListener("touchmove", blockHorizontalPan, { passive: false });
+    return () => {
+      element.removeEventListener("touchstart", rememberStart);
+      element.removeEventListener("touchmove", blockHorizontalPan);
+    };
+  }, []);
   async function submit() {
     if (submitting.current || preparingRef.current) return;
     submitting.current = true; setBusy(true); setMessage("");
@@ -95,11 +113,11 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
     if (event.target !== event.currentTarget) return;
     if (busy || preparing) event.preventDefault(); else onClose();
   }} className="m-auto max-h-[90dvh] w-[min(94vw,38rem)] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/50" aria-labelledby="add-title">
-    <div className="box-border max-h-[90dvh] min-w-0 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain p-6">
+    <div ref={scrollArea} className="box-border max-h-[90dvh] min-w-0 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain p-6">
       <div className="mb-5 flex items-center justify-between gap-4"><h2 id="add-title" className="text-2xl font-bold">Nový nález</h2><button type="button" aria-label="Zavřít formulář" disabled={busy || preparing} className="min-h-11 px-3" onClick={onClose}>✕</button></div>
       <form className="min-w-0 space-y-5" onSubmit={e => { e.preventDefault(); void submit(); }}>
       <p className="text-sm text-[var(--foreground-muted)]">Vybraná poloha: {location[0].toFixed(5)}, {location[1].toFixed(5)}</p>
-      <fieldset disabled={busy} className="space-y-5 disabled:opacity-60">
+      <fieldset disabled={busy} className="min-w-0 space-y-5 disabled:opacity-60">
         <div className="space-y-3">
           <label className="block space-y-2"><span className="text-sm font-medium">Fotografie * ({photos.length}/{MAX_SIGHTING_PHOTOS})</span><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" disabled={locked || preparing || photos.length >= MAX_SIGHTING_PHOTOS} onChange={e => { const files = Array.from(e.target.files ?? []); e.target.value = ""; void addPhotos(files); }} className={fieldClass} /><span className="block text-xs text-[var(--foreground-muted)]">Nejvýše 6 fotek, každá do 30 MB. JPEG, PNG, WebP nebo HEIC. GPS metadata odstraníme. První fotka se zobrazí na mapě.</span></label>
           {preparing && <p role="status" className="text-sm">Připravuji fotografie…</p>}
