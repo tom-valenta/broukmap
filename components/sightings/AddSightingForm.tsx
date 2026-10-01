@@ -94,9 +94,10 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
     // File inputs also emit cancel; only handle cancellation of the dialog itself.
     if (event.target !== event.currentTarget) return;
     if (busy || preparing) event.preventDefault(); else onClose();
-  }} className="m-auto max-h-[90dvh] w-[min(94vw,38rem)] touch-pan-y overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-6 text-[var(--foreground)] shadow-2xl backdrop:bg-black/50" aria-labelledby="add-title">
-    <div className="mb-5 flex items-center justify-between gap-4"><h2 id="add-title" className="text-2xl font-bold">Nový nález</h2><button type="button" aria-label="Zavřít formulář" disabled={busy || preparing} className="min-h-11 px-3" onClick={onClose}>✕</button></div>
-    <form className="space-y-5" onSubmit={e => { e.preventDefault(); void submit(); }}>
+  }} className="m-auto max-h-[90dvh] w-[min(94vw,38rem)] overflow-hidden rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-0 text-[var(--foreground)] shadow-2xl backdrop:bg-black/50" aria-labelledby="add-title">
+    <div className="box-border max-h-[90dvh] min-w-0 touch-pan-y overflow-x-hidden overflow-y-auto overscroll-contain p-6">
+      <div className="mb-5 flex items-center justify-between gap-4"><h2 id="add-title" className="text-2xl font-bold">Nový nález</h2><button type="button" aria-label="Zavřít formulář" disabled={busy || preparing} className="min-h-11 px-3" onClick={onClose}>✕</button></div>
+      <form className="min-w-0 space-y-5" onSubmit={e => { e.preventDefault(); void submit(); }}>
       <p className="text-sm text-[var(--foreground-muted)]">Vybraná poloha: {location[0].toFixed(5)}, {location[1].toFixed(5)}</p>
       <fieldset disabled={busy} className="space-y-5 disabled:opacity-60">
         <div className="space-y-3">
@@ -112,7 +113,7 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
           </ol>
           {locked && <p className="text-xs text-[var(--foreground-muted)]">Nahrávání začalo. Pořadí můžeš upravit po uložení v detailu nálezu.</p>}
         </div>
-        <label className="block space-y-2"><span className="text-sm font-medium">Datum nálezu *</span><input type="date" min="1900-01-01" max={localToday()} required value={date} onChange={e => setDate(e.target.value)} className={fieldClass} /></label>
+        <label className="block min-w-0 space-y-2"><span className="text-sm font-medium">Datum nálezu *</span><input type="date" min="1900-01-01" max={localToday()} required value={date} onChange={e => setDate(e.target.value)} className={`${fieldClass} box-border min-w-0 max-w-full`} /></label>
         {date < localToday() && <p className="text-sm">Nález bude označen jako zpětně přidaný.</p>}
         <SpeciesPicker value={guess} onChange={setGuess} />
         <label className="block space-y-2"><span className="text-sm font-medium">Poznámky (nepovinné)</span><textarea maxLength={1000} rows={3} value={notes} onChange={e => setNotes(e.target.value)} className={fieldClass} /><span className="text-xs text-[var(--foreground-muted)]">Poznámky můžeš později upravit. Neuváděj v nich přesnou polohu citlivých druhů.</span></label>
@@ -124,6 +125,7 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
       </fieldset>
       <p role="status" aria-live="polite" className="text-sm">{message}</p>
       <button type="submit" disabled={busy || preparing || !photos.length} className={`${buttonClass} w-full`}>{busy ? "Ukládám…" : "Přidat nález"}</button>
-    </form>
+      </form>
+    </div>
   </dialog>;
 }
