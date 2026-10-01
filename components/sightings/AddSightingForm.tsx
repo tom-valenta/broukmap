@@ -131,7 +131,7 @@ export default function AddSightingForm({ location, onClose }: { location: [numb
           </ol>
           {locked && <p className="text-xs text-[var(--foreground-muted)]">Nahrávání začalo. Pořadí můžeš upravit po uložení v detailu nálezu.</p>}
         </div>
-        <label className="block min-w-0 space-y-2"><span className="text-sm font-medium">Datum nálezu *</span><input type="date" min="1900-01-01" max={localToday()} required value={date} onChange={e => setDate(e.target.value)} className={`${fieldClass} box-border min-w-0 max-w-full`} /></label>
+        <label className="block min-w-0 space-y-2"><span className="text-sm font-medium">Datum nálezu *</span><input type="date" min="1900-01-01" max={localToday()} required value={date} onChange={e => setDate(e.target.value)} className={`${fieldClass} !w-56 max-w-full`} /></label>
         {date < localToday() && <p className="text-sm">Nález bude označen jako zpětně přidaný.</p>}
         <SpeciesPicker value={guess} onChange={setGuess} />
         <label className="block space-y-2"><span className="text-sm font-medium">Poznámky (nepovinné)</span><textarea maxLength={1000} rows={3} value={notes} onChange={e => setNotes(e.target.value)} className={fieldClass} /><span className="text-xs text-[var(--foreground-muted)]">Poznámky můžeš později upravit. Neuváděj v nich přesnou polohu citlivých druhů.</span></label>
